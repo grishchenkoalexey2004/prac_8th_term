@@ -21,18 +21,35 @@ class MainController {
 class InsuranceComp{
 Класс страховой компании
 ==
-    - auto_base : int - базовые спросы 
+    Базовые спросы
+    - auto_base : int 
     - estate_base : int
     - med_base : int 
     
-    - auto_config : InsuranceProgram - текущие условия страхования
-    - estate_config : InsuranceProgram
-    - med_config : InsuranceProgram
+    - last_program_id : int 
+
+    Флаги позволяющие отслеживать изменения условий страховых программ
+    - auto_config_updated : bool
+    - estate_config_updated : bool
+    - med_config_updated : bool
+
+    Условия страховых программ
+    - auto_price: int
+    - auto_time: int
+    - auto_refund: int 
+    - estate_price: int
+    - estate_time: int
+    - estate_refund : int
+    - med_price: int
+    - med_time: int
+    - med_refund : int
+
     - client_number: Int - общее число клиентов 
     - ins_progs_active: List[Int] - id действующих страховых программ (по которым еще есть неистекшие договора)
     - ins_progs: Map[int][InsuranceAgreement] - пары(id страхового договора, страх договор)
 
     + gen_ins_cases() : Map[Str][Int] - колво страховых случаев по каждому типу страховки
+    + gen_prog_config(type: str) : InsuranceProgram - создаёт объект описывающий страховую программу по текущим усл.
     + add_ins_prog(ins_prog: InsuranceAgreement) : void
     + delete_ins_prog(id: Int)
     + gen_demand() : Map[str][int] - колво купленных страховок каждого типа
