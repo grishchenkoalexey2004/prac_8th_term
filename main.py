@@ -1,22 +1,24 @@
-from typing import Dict,Optional
+from typing import Dict,Optional,Tuple,List
 import tkinter as tk
 from tkinter import ttk
+from random import randint
+
 
 class InsuranceProgram:
     """
         Класс описывающий конфигурацию страховой программы
     """
 
-    def __init__(self,prog_id:int,prog_type:str,time:int,price:int,max_comp:int):
+    def __init__(self,prog_id:int,prog_type:str,time:int,price:int,max_refund:int):
 
         self.prog_id : int = prog_id
-
         self.prog_type : str = prog_type
+
+        # три главных параметра программы
         self.time : int = time 
         self.price : int = price
-        self.max_comp : int = max_comp
+        self.max_refund : int = max_refund
 
-        self.profit_coef : float = (time*max_comp)/price
 
 
 class InsuranceAgreement:
@@ -47,8 +49,8 @@ class InsuranceAgreement:
         Активирует заранее вычисленные страховые случаи
         Возвращает сумму денежной компенсации на текущей итерации по данному страховому договору
         """
-
-        pass    
+        pass
+    
 
 class InsuranceComp:
     """
@@ -59,10 +61,12 @@ class InsuranceComp:
 
         self.client_num: int = 0 
 
-        
+        # флаги обновления конфигурации страховых программ
         self.auto_config_updated : bool = False
+        self.estate_config_updated : bool = False 
+        self.med_config_updated : bool = False
 
-        """ Переменные интерфейса в зоне ответственности InsuranceComp """
+        """ Переменные интерфейса в зоне ответственности InsuranceComp"""
 
         # Текущие значения слайдеров автостраховки (нельзя определять до построения интерфейса)
         self.auto_slider_price : tk.Variable = None
@@ -70,15 +74,35 @@ class InsuranceComp:
         self.auto_slider_refund : tk.Variable = None
         self.auto_slider_base_demand : tk.Variable = None
 
+        # id созданной в последний раз программы страховки
+        self.last_program_id = 0 
 
-        self.auto_config : Optional[InsuranceProgram] = None 
-        self.estate_config : Optional[InsuranceProgram] = None 
-        self.med_config : Optional[InsuranceProgram] = None 
+        # id текущих программ страхования различных типов
+        self.active_autoprog_id = None 
+        self.active_estateprog_id = None 
+        self.active_medprog_id = None 
 
-        self.progs_active: list[int] = [] 
+        # "база" клиентов
+        self.progs_active: List[int] = [] 
         self.ins_agreements: Dict[int,InsuranceAgreement] = dict()
 
+    """ Управление состоянием страховой компании """
+    
+    # инициализация переменных отслеживания программ страхования
+    def init_state(self):
+        self.active_autoprog_id = 0 
+        self.active_estateprog_id = 1 
+        self.active_medprog_id = 2 
 
+        self.active_program_id = 2 
+
+        self.progs_active.append(self.active_autoprog_id)
+        self.progs_active.append(self.active_estateprog_id)
+        self.progs_active.append(self.active_medprog_id)
+
+        return 
+    
+    # инициализация текущих переменных параметров страхования
     def init_slider_vars(self): 
         # временно поставил дефолтные значения
         self.auto_slider_price = tk.Variable(value = 5)
@@ -87,6 +111,12 @@ class InsuranceComp:
         self.auto_slider_base_demand = tk.Variable(value = 10)
 
         return 
+    
+    # добавление проданных страховок в клиентскую базу
+    def update_client_state(self,auto_demand,estate_demand = None,med_demand = None):
+        # смотрим, не обновились ли у нас условия страхования
+        pass
+    
     
     def print_slider_values(self):
         print(f"Auto price: {self.auto_slider_price.get()}")
@@ -97,11 +127,28 @@ class InsuranceComp:
         return 
 
     def reset(self) -> None:
+
+        # возвращение слайдеров и связанных с ними переменных в исходное положение 
         self.auto_config_updated = False
+
+        # пока только для машин
         self.auto_slider_price.set(5)
         self.auto_slider_time.set(5)
         self.auto_slider_refund.set(50)
         self.auto_slider_base_demand.set(10)
+
+        # обнуление конфигураций договоров
+        self.last_program_id = 0 
+
+        self.auto_config = None
+        self.estate_config = None 
+        self.med_config = None 
+
+        # обнуление клиентской "базы" и всего, что с ней связано
+        self.client_num = 0
+        self.progs_active.clear() 
+        self.ins_agreements.clear()
+
 
     def gen_ins_cases(self) -> Dict[str,int]:
         pass 
@@ -113,8 +160,23 @@ class InsuranceComp:
         pass 
 
 
-    def gen_demand() -> None: 
-        pass 
+    """ Генерация спроса, подсчёт прибыли """
+
+    # выдает спрос на страховки различного типа с учётом текущих условий страхования
+
+    def gen_demand(self) -> Dict[str,Tuple[int,int]]:
+        # вычисление коэ-фта выгодности 
+        auto_profit_coef = (self.auto_slider_refund.get()*self.auto_slider_time.get())/self.auto_slider_price.get()
+        auto_add_demand = int(auto_profit_coef//10)
+        auto_demand = self.auto_slider_base_demand.get() + auto_add_demand + randint(-1*auto_add_demand,5)
+        auto_profit = auto_demand*self.auto_slider_price.get()
+
+
+        return_object = {"auto" : (auto_demand,auto_profit)}
+        self.update_client_state(auto_demand)
+
+        return return_object
+    
 
 
 
@@ -147,7 +209,9 @@ class MainController:
 
         # запускаем конструктор интерфейса 
         self.construct_gui()
-
+        
+        # запускаем инициализацию состояния компании 
+        self.ins_company.init_state() 
         # Запускаем главный цикл обработки событий
         self.root.mainloop()
 
@@ -219,6 +283,7 @@ class MainController:
 
         if not self.modeling_started:
             print("Моделирование запущено!")
+            self.modeling_started = True
 
         self.simulate_month()
 
@@ -243,7 +308,10 @@ class MainController:
     """ Методы выполнения итерации """
 
     def simulate_month(self) -> None:
-        self.modeling_started = True
+
+        sell_stats = self.ins_company.gen_demand()
+        print(sell_stats)
+
 
         self.print_finance()
         self.print_sliders() 

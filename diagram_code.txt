@@ -2,12 +2,12 @@
 class MainController { 
 Главный класс программы
 ==
-    - curmonth: int
-    - cur_networth: int 
-    - cur_profit: int 
-    - cur_loss: int 
-    - tax_percent: int
-    - tax_loss: int 
+    - curmonth: Int
+    - cur_networth: Int 
+    - cur_profit: Int 
+    - cur_loss: Int 
+    - tax_percent: Int
+    - tax_loss: Int 
 
     - ins_company: InsuranceComp
 
@@ -22,11 +22,11 @@ class InsuranceComp{
 Класс страховой компании
 ==
     Базовые спросы
-    - auto_base : int 
-    - estate_base : int
-    - med_base : int 
+    - auto_base : Int 
+    - estate_base : Int
+    - med_base : Int 
     
-    - last_program_id : int 
+    - last_program_id : Int 
 
     Флаги позволяющие отслеживать изменения условий страховых программ
     - auto_config_updated : bool
@@ -34,25 +34,25 @@ class InsuranceComp{
     - med_config_updated : bool
 
     Условия страховых программ
-    - auto_price: int
-    - auto_time: int
-    - auto_refund: int 
-    - estate_price: int
-    - estate_time: int
-    - estate_refund : int
-    - med_price: int
-    - med_time: int
-    - med_refund : int
+    - auto_price: Int
+    - auto_time: Int
+    - auto_refund: Int 
+    - estate_price: Int
+    - estate_time: Int
+    - estate_refund : Int
+    - med_price: Int
+    - med_time: Int
+    - med_refund : Int
 
     - client_number: Int - общее число клиентов 
     - ins_progs_active: List[Int] - id действующих страховых программ (по которым еще есть неистекшие договора)
-    - ins_progs: Map[int][InsuranceAgreement] - пары(id страхового договора, страх договор)
+    - ins_progs: Map[Int][InsuranceAgreement] - пары(id страхового договора, страх договор)
 
     + gen_ins_cases() : Map[Str][Int] - колво страховых случаев по каждому типу страховки
     + gen_prog_config(type: str) : InsuranceProgram - создаёт объект описывающий страховую программу по текущим усл.
     + add_ins_prog(ins_prog: InsuranceAgreement) : void
     + delete_ins_prog(id: Int)
-    + gen_demand() : Map[str][int] - колво купленных страховок каждого типа
+    + gen_demand() : Map[str][Int] - (колво купл. страховок, прибыль) по каждому типу страховки
 }
 
 
@@ -65,20 +65,21 @@ class InsuranceAgreement{
     - case_dates: List[Int] - времена возникновения страховых случаев 
     - prog_config: InsuranceProgram
 
-    + add_clients(client_arr:List[int]) : void
-    + gen_insurance_cases() : int - сумма выплат по данному договору на данной итерации    
+    + add_clients(client_arr:List[Int]) : void
+    + gen_insurance_cases() : Int - сумма выплат по данному договору на данной итерации    
 }
 
 
 class InsuranceProgram{
 Конфигурация страховой программы
 ==
-    - program_id : Int - уникальный идентификатор совокупности страховых условий
+    - program_id : Int - уникальный идентификатор страховой программы
     - prog_type : Str
+
+
     - time : Int
     - price : Int
     - max_comp : Int
-    - profit_coef : Float - коэф-т привлекательности страховки
 
 }
 
