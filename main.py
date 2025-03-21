@@ -59,9 +59,17 @@ class InsuranceComp:
 
         self.client_num: int = 0 
 
-        self.auto_base_demand : int = 10    
-        self.estate_base_demand : int = 5        
-        self.med_base_demand : int = 20 
+        
+        self.auto_config_updated : bool = False
+
+        """ Переменные интерфейса в зоне ответственности InsuranceComp """
+
+        # Текущие значения слайдеров автостраховки (нельзя определять до построения интерфейса)
+        self.auto_slider_price : tk.Variable = None
+        self.auto_slider_time : tk.Variable = None   
+        self.auto_slider_refund : tk.Variable = None
+        self.auto_slider_base_demand : tk.Variable = None
+
 
         self.auto_config : Optional[InsuranceProgram] = None 
         self.estate_config : Optional[InsuranceProgram] = None 
@@ -71,6 +79,30 @@ class InsuranceComp:
         self.ins_agreements: Dict[int,InsuranceAgreement] = dict()
 
 
+    def init_slider_vars(self): 
+        # временно поставил дефолтные значения
+        self.auto_slider_price = tk.Variable(value = 5)
+        self.auto_slider_time = tk.Variable(value = 5)
+        self.auto_slider_refund = tk.Variable(value = 50)
+        self.auto_slider_base_demand = tk.Variable(value = 10)
+
+        return 
+    
+    def print_slider_values(self):
+        print(f"Auto price: {self.auto_slider_price.get()}")
+        print(f"Auto time: {self.auto_slider_time.get()}")
+        print(f"Auto refund: {self.auto_slider_refund.get()}")
+        print(f"Auto demand: {self.auto_slider_base_demand.get()}")
+
+        return 
+
+    def reset(self) -> None:
+        self.auto_config_updated = False
+        self.auto_slider_price.set(5)
+        self.auto_slider_time.set(5)
+        self.auto_slider_refund.set(50)
+        self.auto_slider_base_demand.set(10)
+
     def gen_ins_cases(self) -> Dict[str,int]:
         pass 
 
@@ -79,6 +111,7 @@ class InsuranceComp:
 
     def delete_ins_prog(ins_prog_id:int) -> None: 
         pass 
+
 
     def gen_demand() -> None: 
         pass 
@@ -102,17 +135,10 @@ class MainController:
 
         self.ins_company : InsuranceComp = InsuranceComp()
 
-
-
-        """ Переменные графического интерфейса """
+        """ Переменные графического интерфейса в зоне ответственности MainController """
 
         self.root : tk.Tk = None
 
-        self.auto_config_updated : bool = False
-
-        self.auto_slider_price : tk.Variable = None
-        self.auto_slider_time : tk.Variable = None   
-        self.auto_slider_refund : tk.Variable = None
 
 
 
@@ -138,11 +164,9 @@ class MainController:
         params_label.grid(row=0, column=0, padx=10, pady=10)
 
 
-        # Инициализируем переменные:
+        # Инициализируем переменные, хранящие значения слайдеров для параметров договора:
 
-        self.auto_slider_price = tk.Variable(value = 5)
-        self.auto_slider_time = tk.Variable(value = 5)
-        self.auto_slider_refund = tk.Variable(value = 50)
+        self.ins_company.init_slider_vars()
 
         """ Создание слайдеров настройки программ страхования """
 
@@ -151,18 +175,26 @@ class MainController:
 
         # сладер стоимости страховки
         auto_slider_price = tk.Scale(self.root, from_=3, to=10, orient="horizontal",resolution =1,
-                                     variable = self.auto_slider_price,command = self.update_auto_config)
+                                     variable = self.ins_company.auto_slider_price,command = self.update_auto_config)
         auto_slider_price.grid(row=1, column=1, padx=10, pady=10)
 
         # слайдер времени действия
         auto_slider_time = tk.Scale(self.root, from_=3, to=12, orient="horizontal",resolution =1,
-                                    variable = self.auto_slider_time,command = self.update_auto_config)
+                                    variable = self.ins_company.auto_slider_time,command = self.update_auto_config)
         auto_slider_time.grid(row=1, column=2, padx=10, pady=10)
 
         # слайдер возмещения
         auto_slider_refund = tk.Scale(self.root, from_=0, to=100, orient="horizontal",resolution =1,
-                                      variable = self.auto_slider_refund,command = self.update_auto_config)
+                                      variable = self.ins_company.auto_slider_refund,command = self.update_auto_config)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
+
+        # слайдер базового спроса автостраховки
+        auto_slider_label = ttk.Label(self.root, text="Базовый спрос:",font=("Arial",12))
+        auto_slider_label.grid(row=2, column=0, padx=10, pady=10)
+
+        auto_slider_demand = tk.Scale(self.root, from_=2, to=20, orient="horizontal",resolution =1,
+                                      variable = self.ins_company.auto_slider_base_demand)
+        auto_slider_demand.grid(row=2, column=1, padx=10, pady=10)
 
         """ Создание кнопок """
         
@@ -197,27 +229,24 @@ class MainController:
         print("Пока нереализована")
 
     def reset_button_click(self) -> None:
-        self.networth = 100
-        self.curmonth = 1 
-
-
-        self.modeling_started = False 
-        self.auto_config_updated = False
-
         print("Reset")
 
+        self.reset()
+        
 
     """ Обработчики слайдеров """
 
     def update_auto_config(self,event):
-        self.auto_config_updated = True 
+        self.ins_company.auto_config_updated = True 
 
 
     """ Методы выполнения итерации """
 
     def simulate_month(self) -> None:
+        self.modeling_started = True
 
         self.print_finance()
+        self.print_sliders() 
         self.curmonth += 1
 
         # временно поставил 10 - конец симуляции по времени
@@ -225,9 +254,29 @@ class MainController:
             print("Симуляция завершена")
 
 
-    def print_finance(self) -> None:
-        print(f"Текущий месяц: {self.curmonth}\nКапитал: {self.networth}\nПрибыль: {self.cur_profit}\nУбыток: {self.cur_loss}")
+    def reset(self) -> None:
 
+        self.networth = 100
+        self.curmonth = 1 
+
+        self.modeling_started = False 
+
+        # сброс переменных класса InsuranceComp
+        self.ins_company.reset() 
+
+
+
+    def print_finance(self) -> None:
+        print(f"Текущий месяц: {self.curmonth}")
+        print(f"Капитал: {self.networth}")
+        print(f"Прибыль: {self.cur_profit}")
+        print(f"Убыток: {self.cur_loss}")
+
+        return 
+
+    def print_sliders(self) -> None:
+        self.ins_company.print_slider_values()
+        return 
 
 
 main_controller = MainController()
