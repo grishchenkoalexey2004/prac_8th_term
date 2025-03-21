@@ -1,5 +1,6 @@
 from typing import Dict,Optional
-
+import tkinter as tk
+from tkinter import ttk
 
 class InsuranceProgram:
     """
@@ -90,22 +91,146 @@ class MainController:
     """
     
     def __init__(self):
-        self.curmonth = 1
+        self.modeling_started : bool = False
+        self.curmonth : int = 1
 
-        self.cur_profit = 0 
-        self.cur_loss = 0
+        self.cur_profit : int = 0 
+        self.cur_loss : int = 0
 
-        self.networth = None
-        self.tax_percent = None
+        self.networth = 100
+        self.tax_percent = 5
 
         self.ins_company : InsuranceComp = InsuranceComp()
 
 
-    def launch_modelling() -> None:
-        pass 
 
-    def restart_modelling() -> None:
-        pass
+        """ Переменные графического интерфейса """
 
-    def simulate_month() -> None:
-        pass
+        self.root : tk.Tk = None
+
+        self.auto_config_updated : bool = False
+
+        self.auto_slider_price : tk.Variable = None
+        self.auto_slider_time : tk.Variable = None   
+        self.auto_slider_refund : tk.Variable = None
+
+
+
+    def run(self) -> None: 
+        """ Самая первая процедура для запуска """
+
+        # запускаем конструктор интерфейса 
+        self.construct_gui()
+
+        # Запускаем главный цикл обработки событий
+        self.root.mainloop()
+
+        return  
+    
+
+    def construct_gui(self) -> None:
+
+        # Создаем главное окно
+        self.root = tk.Tk()
+        self.root.title("Моделирование работы страховой компании")
+
+        params_label = ttk.Label(self.root,text="ПАРАМЕТРЫ",font=("Arial",20))
+        params_label.grid(row=0, column=0, padx=10, pady=10)
+
+
+        # Инициализируем переменные:
+
+        self.auto_slider_price = tk.Variable(value = 5)
+        self.auto_slider_time = tk.Variable(value = 5)
+        self.auto_slider_refund = tk.Variable(value = 50)
+
+        """ Создание слайдеров настройки программ страхования """
+
+        auto_slider_label = ttk.Label(self.root, text="АВТО:",font=("Arial",16))
+        auto_slider_label.grid(row=1, column=0, padx=10, pady=10)
+
+        # сладер стоимости страховки
+        auto_slider_price = tk.Scale(self.root, from_=3, to=10, orient="horizontal",resolution =1,
+                                     variable = self.auto_slider_price,command = self.update_auto_config)
+        auto_slider_price.grid(row=1, column=1, padx=10, pady=10)
+
+        # слайдер времени действия
+        auto_slider_time = tk.Scale(self.root, from_=3, to=12, orient="horizontal",resolution =1,
+                                    variable = self.auto_slider_time,command = self.update_auto_config)
+        auto_slider_time.grid(row=1, column=2, padx=10, pady=10)
+
+        # слайдер возмещения
+        auto_slider_refund = tk.Scale(self.root, from_=0, to=100, orient="horizontal",resolution =1,
+                                      variable = self.auto_slider_refund,command = self.update_auto_config)
+        auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
+
+        """ Создание кнопок """
+        
+        # Кнопка старт/итерация
+        button = ttk.Button(self.root, text="Старт/Итерация", command=self.iteration_button_click)
+        button.grid(row=4, column=0, columnspan=1, pady=10)
+
+        # Кнопка стоп
+        button = ttk.Button(self.root, text="СТОП", command=self.stop_button_click)
+        button.grid(row=4, column=1, columnspan=1, pady=10)
+
+        # Кнопка Reset
+
+        button = ttk.Button(self.root, text="ЗАНОВО", command=self.reset_button_click)
+        button.grid(row=4, column=2, columnspan=1, pady=10, padx = 10)
+
+
+        
+
+    """ Обработчики кнопок """
+    def iteration_button_click(self) -> None: 
+
+        if not self.modeling_started:
+            print("Моделирование запущено!")
+
+        self.simulate_month()
+
+        return 
+    
+
+    def stop_button_click(self) -> None:
+        print("Пока нереализована")
+
+    def reset_button_click(self) -> None:
+        self.networth = 100
+        self.curmonth = 1 
+
+
+        self.modeling_started = False 
+        self.auto_config_updated = False
+
+        print("Reset")
+
+
+    """ Обработчики слайдеров """
+
+    def update_auto_config(self,event):
+        self.auto_config_updated = True 
+
+
+    """ Методы выполнения итерации """
+
+    def simulate_month(self) -> None:
+
+        self.print_finance()
+        self.curmonth += 1
+
+        # временно поставил 10 - конец симуляции по времени
+        if self.curmonth>10:
+            print("Симуляция завершена")
+
+
+    def print_finance(self) -> None:
+        print(f"Текущий месяц: {self.curmonth}\nКапитал: {self.networth}\nПрибыль: {self.cur_profit}\nУбыток: {self.cur_loss}")
+
+
+
+main_controller = MainController()
+
+main_controller.run() 
+
