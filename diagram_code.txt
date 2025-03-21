@@ -1,0 +1,74 @@
+@startuml
+class MainController { 
+Главный класс программы
+==
+    - curmonth: int
+    - cur_networth: int 
+    - cur_profit: int 
+    - cur_loss: int 
+    - tax_percent: int
+    - tax_loss: int 
+
+    - ins_company: InsuranceComp
+
+    + launch_model() : void
+    + restart_model() : void
+    + modulate_month() : void
+    
+
+}
+
+class InsuranceComp{
+Класс страховой компании
+==
+    - auto_base : int - базовые спросы 
+    - estate_base : int
+    - med_base : int 
+    
+    - auto_config : InsuranceProgram - текущие условия страхования
+    - estate_config : InsuranceProgram
+    - med_config : InsuranceProgram
+    - client_number: Int - общее число клиентов 
+    - ins_progs_active: List[Int] - id действующих страховых программ (по которым еще есть неистекшие договора)
+    - ins_progs: Map[int][InsuranceAgreement] - пары(id страхового договора, страх договор)
+
+    + gen_ins_cases() : Map[Str][Int] - колво страховых случаев по каждому типу страховки
+    + add_ins_prog(ins_prog: InsuranceAgreement) : void
+    + delete_ins_prog(id: Int)
+    + gen_demand() : Map[str][int] - колво купленных страховок каждого типа
+}
+
+
+class InsuranceAgreement{
+Класс страхового договора
+==
+    - program_id: Int
+    - has_InsuranceComp: bool
+    - InsuranceComp: List[Int] - сроки действия договоров клиентов
+    - case_dates: List[Int] - времена возникновения страховых случаев 
+    - prog_config: InsuranceProgram
+
+    + add_clients(client_arr:List[int]) : void
+    + gen_insurance_cases() : int - сумма выплат по данному договору на данной итерации    
+}
+
+
+class InsuranceProgram{
+Конфигурация страховой программы
+==
+    - program_id : Int - уникальный идентификатор совокупности страховых условий
+    - prog_type : Str
+    - time : Int
+    - price : Int
+    - max_comp : Int
+    - profit_coef : Float - коэф-т привлекательности страховки
+
+}
+
+MainController "1" --> "1" InsuranceComp
+InsuranceComp "1" --> "many" InsuranceAgreement
+InsuranceComp "1" --> "3" InsuranceProgram 
+InsuranceAgreement "1" --> "1" InsuranceProgram
+
+
+@enduml

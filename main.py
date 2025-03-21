@@ -47,7 +47,7 @@ class InsuranceAgreement:
         Возвращает сумму денежной компенсации на текущей итерации по данному страховому договору
         """
 
-        pass 
+        pass    
 
 class InsuranceComp:
     """
