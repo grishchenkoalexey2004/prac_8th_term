@@ -330,17 +330,17 @@ class MainController:
         auto_slider_label.grid(row=1, column=0, padx=10, pady=10)
 
         # сладер стоимости страховки
-        auto_slider_price = tk.Scale(self.root, from_=3, to=10, orient="horizontal",resolution =1,
+        auto_slider_price = tk.Scale(self.root, from_=3, to=10, orient="horizontal",label = "цена",resolution =1,
                                      variable = self.ins_company.auto_slider_price,command = self.set_auto_update_flag)
         auto_slider_price.grid(row=1, column=1, padx=10, pady=10)
 
         # слайдер времени действия
-        auto_slider_time = tk.Scale(self.root, from_=3, to=12, orient="horizontal",resolution =1,
+        auto_slider_time = tk.Scale(self.root, from_=3, to=12, orient="horizontal",label = "время",resolution =1,
                                     variable = self.ins_company.auto_slider_time,command = self.set_auto_update_flag)
         auto_slider_time.grid(row=1, column=2, padx=10, pady=10)
 
         # слайдер возмещения
-        auto_slider_refund = tk.Scale(self.root, from_=0, to=100, orient="horizontal",resolution =1,
+        auto_slider_refund = tk.Scale(self.root, from_=0, to=100, orient="horizontal",label = "возврат",resolution =1,
                                       variable = self.ins_company.auto_slider_refund,command = self.set_auto_update_flag)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
