@@ -6,14 +6,20 @@ class MainController {
     - cur_networth: Int 
     - cur_profit: Int 
     - cur_loss: Int 
-    - tax_percent: Int
-    - tax_loss: Int 
 
+    - tax_percent: Int
+    - tax_value: Int 
+
+    - auto_sold: Int
+    - estate_sold: Int
+    - med_sold: Int
+    
     - ins_company: InsuranceComp
 
-    + launch_model() : void
-    + restart_model() : void
-    + modulate_month() : void
+    + run() : void
+    + reset() : void
+    + update_sell(sell_stats:Map[Str][Tuple[Int,Int]]) - учёт продажи страховок
+    + simulate_month() : void
     
 
 }
@@ -26,12 +32,17 @@ class InsuranceComp{
     - estate_base : Int
     - med_base : Int 
     
-    - last_program_id : Int 
 
     Флаги позволяющие отслеживать изменения условий страховых программ
     - auto_config_updated : bool
     - estate_config_updated : bool
     - med_config_updated : bool
+
+    Id актуальных страховых программ каждого типа
+    - self.cur_autoprog_id : Int 
+    - self.cur_estateprog_id : Int 
+    - self.cur_medprog_id : Int 
+    - self.last_program_id : Int
 
     Условия страховых программ
     - auto_price: Int
@@ -48,10 +59,13 @@ class InsuranceComp{
     - ins_progs_active: List[Int] - id действующих страховых программ (по которым еще есть неистекшие договора)
     - ins_progs: Map[Int][InsuranceAgreement] - пары(id страхового договора, страх договор)
 
-    + gen_ins_cases() : Map[Str][Int] - колво страховых случаев по каждому типу страховки
-    + gen_prog_config(type: str) : InsuranceProgram - создаёт объект описывающий страховую программу по текущим усл.
-    + add_ins_prog(ins_prog: InsuranceAgreement) : void
-    + delete_ins_prog(id: Int)
+    + init_state() : void
+    + update_client_state(auto_demand:int,estate_demand:int,med_demand:int) : void - добавл. новых клиентов
+    + update_dates() : void
+    + add_ins_agr(prog_id:int,ins_agr: InsuranceAgreement) : void
+    + reset() : void
+    + reset_programs() : void
+    + gen_ins_cases() : Map[Str][Int]
     + gen_demand() : Map[str][Int] - (колво купл. страховок, прибыль) по каждому типу страховки
 }
 
@@ -60,33 +74,20 @@ class InsuranceAgreement{
 Класс страхового договора
 ==
     - program_id: Int
-    - has_InsuranceComp: bool
-    - InsuranceComp: List[Int] - сроки действия договоров клиентов
-    - case_dates: List[Int] - времена возникновения страховых случаев 
-    - prog_config: InsuranceProgram
+    - program_type: Str
+    - program_price: Int
+    - program_time: Int 
+    - program_refund: Int
 
+    - has_clients: bool
+    - client_list: List[Int]
+    
     + add_clients(client_arr:List[Int]) : void
+    + update_dates() : int - количество клиентов расторгнувших договор
     + gen_insurance_cases() : Int - сумма выплат по данному договору на данной итерации    
-}
-
-
-class InsuranceProgram{
-Конфигурация страховой программы
-==
-    - program_id : Int - уникальный идентификатор страховой программы
-    - prog_type : Str
-
-
-    - time : Int
-    - price : Int
-    - max_comp : Int
-
 }
 
 MainController "1" --> "1" InsuranceComp
 InsuranceComp "1" --> "many" InsuranceAgreement
-InsuranceComp "1" --> "3" InsuranceProgram 
-InsuranceAgreement "1" --> "1" InsuranceProgram
-
 
 @enduml
