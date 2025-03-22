@@ -180,21 +180,25 @@ class InsuranceComp:
         return return_object
     
 
-
-
 class MainController:
     """
         Главный класс, отвечающий за взаимодействие между интерфейсом и всеми остальными классами
     """
     
     def __init__(self):
+        # флаги для управления итерациями
         self.modeling_started : bool = False
+        self.modeling_finished : bool = False
+        self.is_bankrupt : bool = False 
+
+        # номер текущего месяца
         self.curmonth : int = 1
 
+        # финансовые показатели
+        self.networth = 100
         self.cur_profit : int = 0 
         self.cur_loss : int = 0
 
-        self.networth = 100
         self.tax_percent = 5
 
         self.ins_company : InsuranceComp = InsuranceComp()
@@ -202,8 +206,6 @@ class MainController:
         """ Переменные графического интерфейса в зоне ответственности MainController """
 
         self.root : tk.Tk = None
-
-
 
 
     def run(self) -> None: 
@@ -287,25 +289,37 @@ class MainController:
             print("Моделирование запущено!")
             self.modeling_started = True
 
-        self.simulate_month()
+        # проверяем остались ли еще итерации
+        if self.modeling_finished or self.is_bankrupt:
+
+            if self.modeling_finished:
+                print("Моделирование завершено!, нажмите Reset")
+
+            if self.is_bankrupt:
+                print("Компания обанкротилась!")
+
+        else:
+            self.simulate_month()
 
         return 
     
 
     def stop_button_click(self) -> None:
         print("Пока нереализована")
+        return 
 
     def reset_button_click(self) -> None:
         print("Reset")
 
         self.reset()
+        return 
         
 
     """ Обработчики слайдеров """
 
     def update_auto_config(self,event):
         self.ins_company.auto_config_updated = True 
-
+        return 
 
     """ Методы выполнения итерации """
 
@@ -322,6 +336,13 @@ class MainController:
         # временно поставил 10 - конец симуляции по времени
         if self.curmonth>10:
             print("Симуляция завершена")
+            self.modeling_finished = True 
+
+
+        if self.networth<0:
+            print("Компания обанкротилась")
+            self.is_bankrupt = True
+
 
 
     def reset(self) -> None:
