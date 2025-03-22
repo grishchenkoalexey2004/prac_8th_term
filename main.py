@@ -20,15 +20,19 @@ class InsuranceAgreement:
         self.prog_time: int = prog_time
         self.prog_refund: int = prog_refund
         
+        # флаг наличия клиентов, подписавших договор
         self.has_clients: bool = False 
-        self.client_list: list[int] = [] 
-        self.case_dates: list[int] = [] 
+        # на 0-ой позиции - кол-во клиентов у которых 1 мес до истечения договора, на второй ...
+        self.client_list: list[int] = [0 for i in range(prog_time)]
 
+    # добавляет новых клиентов, подписавших договор на текущей итерации
+    def add_clients(self,client_num:int) -> None:
+        if client_num!=0:
+            self.has_clients = True
 
+        self.client_list[self.prog_time-1] = client_num
 
-    def add_clients(client_arr:list[int]) -> None:
-        """ добавляет новых клиентов, подписавших договор на текущей итерации """
-        pass
+        return
 
     def gen_insurance_cases() -> int:
         """
@@ -36,6 +40,19 @@ class InsuranceAgreement:
         Возвращает сумму денежной компенсации на текущей итерации по данному страховому договору
         """
         pass
+    
+    
+    def update_dates(self) -> int:
+        """
+        Обновляет сроки действия договоров с учётом пройденного месяца, удаляет клиентов 
+        с истёкшим сроком договора, возвращая их количество 
+        """
+        deleted_count = self.client_list[0]
+
+        for month in range(self.prog_time-1):
+            self.client_list[month] = self.client_list[month+1]
+
+        return deleted_count  
 
     def __repr__(self):
         return f"Prog_id: {self.prog_id}, prog_type: {self.prog_type}, clients: {self.client_list}"
@@ -92,15 +109,11 @@ class InsuranceComp:
         self.last_program_id = 2 
 
         # инициализация начальных страховых программ
-        self.progs_active.append(self.cur_autoprog_id)
-        self.ins_agreements[self.cur_autoprog_id] = self.create_ins_agr("auto",self.cur_autoprog_id)
 
-        self.progs_active.append(self.cur_estateprog_id)
-        self.ins_agreements[self.cur_estateprog_id] = self.create_ins_agr("estate",self.cur_estateprog_id)
+        self.add_ins_agr(self.cur_autoprog_id,self.create_ins_agr("auto",self.cur_autoprog_id))
+        self.add_ins_agr(self.cur_estateprog_id,self.create_ins_agr("estate",self.cur_estateprog_id))
+        self.add_ins_agr(self.cur_medprog_id,self.create_ins_agr("med",self.cur_medprog_id))
 
-        self.progs_active.append(self.cur_medprog_id)
-        self.ins_agreements[self.cur_medprog_id] = self.create_ins_agr("med",self.cur_medprog_id)
- 
         return 
     
     # инициализация текущих переменных параметров страхования
@@ -113,10 +126,34 @@ class InsuranceComp:
 
         return 
     
-    # добавление проданных страховок в клиентскую базу
-    def update_client_state(self,auto_demand,estate_demand = None,med_demand = None):
+    """ Обновление на каждой итерации"""
+    
+    # добавление проданных страховок в клиентскую базу, создание новых договоров при изменении условий
+    def update_client_state(self,auto_demand,estate_demand = None,med_demand = None) -> None:
         # смотрим, не обновились ли у нас условия страхования
-        pass
+        
+        # если обновились условия страхования - создаём новый договор
+        if self.auto_config_updated:
+            self.last_program_id+=1
+            self.cur_autoprog_id = self.last_program_id
+
+            new_agr = self.create_ins_agr("auto",self.cur_autoprog_id)
+            self.add_ins_agr(self.cur_autoprog_id,new_agr) 
+
+            self.auto_config_updated = False
+
+        self.ins_agreements[self.cur_autoprog_id].add_clients(auto_demand)
+        
+
+        # нужно добавить такую же логику про остальные типы страховок
+        return None 
+
+    def update_dates(self) -> None:
+        #! нужно модифицировать, чтобы возвращала количество расторгнувших договор по каждому типу страховки
+        for prog_id in self.progs_active:
+            self.ins_agreements[prog_id].update_dates()
+        
+        return
     
     # создание страхового договора определённого типа по заданным условиям
     def create_ins_agr(self,prog_type:str,prog_id: int)-> InsuranceAgreement:
@@ -142,7 +179,15 @@ class InsuranceComp:
         
         return InsuranceAgreement(prog_id,prog_type,prog_price,prog_time,prog_refund)
     
+    # добавляет в "базу" новый страховой договор
+    def add_ins_agr(self,prog_id:int,agr_obj:InsuranceAgreement) -> None: 
+        self.progs_active.append(prog_id)
+        self.ins_agreements[prog_id] = agr_obj
 
+        return 
+    
+    """ Процедуры обновления состояния страховой компании """
+    
     def reset(self) -> None:
         self.reset_programs()
         self.reset_slider_vars()
@@ -169,9 +214,7 @@ class InsuranceComp:
 
     def gen_ins_cases(self) -> Dict[str,int]:
         pass 
-
-    def add_ins_agr(ins_agr:InsuranceAgreement) -> None:
-        pass 
+ 
 
     def delete_ins_prog(ins_prog_id:int) -> None: 
         pass 
@@ -288,17 +331,17 @@ class MainController:
 
         # сладер стоимости страховки
         auto_slider_price = tk.Scale(self.root, from_=3, to=10, orient="horizontal",resolution =1,
-                                     variable = self.ins_company.auto_slider_price,command = self.update_auto_config)
+                                     variable = self.ins_company.auto_slider_price,command = self.set_auto_update_flag)
         auto_slider_price.grid(row=1, column=1, padx=10, pady=10)
 
         # слайдер времени действия
         auto_slider_time = tk.Scale(self.root, from_=3, to=12, orient="horizontal",resolution =1,
-                                    variable = self.ins_company.auto_slider_time,command = self.update_auto_config)
+                                    variable = self.ins_company.auto_slider_time,command = self.set_auto_update_flag)
         auto_slider_time.grid(row=1, column=2, padx=10, pady=10)
 
         # слайдер возмещения
         auto_slider_refund = tk.Scale(self.root, from_=0, to=100, orient="horizontal",resolution =1,
-                                      variable = self.ins_company.auto_slider_refund,command = self.update_auto_config)
+                                      variable = self.ins_company.auto_slider_refund,command = self.set_auto_update_flag)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
         # слайдер базового спроса автостраховки
@@ -360,7 +403,7 @@ class MainController:
 
     """ Обработчики слайдеров """
 
-    def update_auto_config(self,event):
+    def set_auto_update_flag(self,event):
         self.ins_company.auto_config_updated = True 
         return 
 
@@ -377,6 +420,9 @@ class MainController:
         loss_stats = self.ins_company.gen_ins_cases()
 
         self.print_state()
+
+        # обновление дат
+        self.ins_company.update_dates()
         self.curmonth += 1
 
         # временно поставил 10 - конец симуляции по времени
@@ -402,7 +448,6 @@ class MainController:
         auto_sold_quantity,auto_profit = sell_stats["auto"]
         self.auto_sold = auto_sold_quantity
         self.cur_profit += auto_profit
-
 
 
         self.networth += self.cur_profit
