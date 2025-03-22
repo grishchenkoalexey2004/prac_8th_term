@@ -149,6 +149,8 @@ class InsuranceComp:
         self.progs_active.clear() 
         self.ins_agreements.clear()
 
+        self.init_state() 
+
 
     def gen_ins_cases(self) -> Dict[str,int]:
         pass 
