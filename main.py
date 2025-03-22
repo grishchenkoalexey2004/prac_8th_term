@@ -88,13 +88,19 @@ class InsuranceComp:
 
     """ Управление состоянием страховой компании """
     
+    def init_state(self) -> None:
+        self.init_programs_state()
+        self.init_slider_vars()
+
+        return
+
     # инициализация переменных отслеживания программ страхования
-    def init_state(self):
+    def init_programs_state(self) -> None:
         self.active_autoprog_id = 0 
         self.active_estateprog_id = 1 
         self.active_medprog_id = 2 
 
-        self.active_program_id = 2 
+        self.last_program_id = 2 
 
         self.progs_active.append(self.active_autoprog_id)
         self.progs_active.append(self.active_estateprog_id)
@@ -103,7 +109,7 @@ class InsuranceComp:
         return 
     
     # инициализация текущих переменных параметров страхования
-    def init_slider_vars(self): 
+    def init_slider_vars(self) -> None: 
         # временно поставил дефолтные значения
         self.auto_slider_price = tk.Variable(value = 5)
         self.auto_slider_time = tk.Variable(value = 5)
@@ -127,30 +133,28 @@ class InsuranceComp:
         return 
 
     def reset(self) -> None:
+        self.reset_programs()
+        self.reset_slider_vars()
 
-        # возвращение слайдеров и связанных с ними переменных в исходное положение 
-        self.auto_config_updated = False
-
-        # пока только для машин
+    def reset_slider_vars(self) -> None:
+        self.auto_config_updated = False 
+        
         self.auto_slider_price.set(5)
         self.auto_slider_time.set(5)
         self.auto_slider_refund.set(50)
         self.auto_slider_base_demand.set(10)
 
-        # обнуление конфигураций договоров
+        return 
+    
+    def reset_programs(self) -> None: 
         self.last_program_id = 0 
-
-        self.auto_config = None
-        self.estate_config = None 
-        self.med_config = None 
-
-        # обнуление клиентской "базы" и всего, что с ней связано
         self.client_num = 0
         self.progs_active.clear() 
         self.ins_agreements.clear()
 
-        self.init_state() 
-
+        # создаем начальные значения после сброса
+        self.init_programs_state()
+        return 
 
     def gen_ins_cases(self) -> Dict[str,int]:
         pass 
@@ -208,29 +212,37 @@ class MainController:
         self.root : tk.Tk = None
 
 
+    # процедура запуска всей программы
     def run(self) -> None: 
-        """ Самая первая процедура для запуска """
+        
+        # создание корня интерфейса
+        self.init_root() 
+
+        # инициализация страховой компании (внутри неё есть перем., используемые интерфейсом)
+        self.ins_company.init_state()
 
         # запускаем конструктор интерфейса 
-        self.construct_gui()
+        self.init_gui()
+
         
-        # запускаем инициализацию состояния компании 
-        self.ins_company.init_state() 
         # Запускаем главный цикл обработки событий
         self.root.mainloop()
 
         return  
     
-
-    def construct_gui(self) -> None:
-
-        # Создаем главное окно
+    def init_root(self) -> None:
         self.root = tk.Tk()
         self.root.title("Моделирование работы страховой компании")
+        
+        return
+
+    def init_gui(self) -> None:
+
+        # Создаем главное окно
+        
 
         params_label = ttk.Label(self.root,text="ПАРАМЕТРЫ",font=("Arial",20))
         params_label.grid(row=0, column=0, padx=10, pady=10)
-
 
         # Инициализируем переменные, хранящие значения слайдеров для параметров договора:
 
@@ -278,9 +290,7 @@ class MainController:
 
         button = ttk.Button(self.root, text="ЗАНОВО", command=self.reset_button_click)
         button.grid(row=4, column=2, columnspan=1, pady=10, padx = 10)
-
-
-        
+ 
 
     """ Обработчики кнопок """
     def iteration_button_click(self) -> None: 
@@ -352,7 +362,7 @@ class MainController:
 
         self.modeling_started = False 
 
-        # сброс переменных класса InsuranceComp
+        # reset страховой компании  
         self.ins_company.reset() 
 
 
