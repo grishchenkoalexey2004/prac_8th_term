@@ -52,6 +52,8 @@ class InsuranceAgreement:
         for month in range(self.prog_time-1):
             self.client_list[month] = self.client_list[month+1]
 
+        self.client_list[-1] = 0
+
         return deleted_count  
 
     def __repr__(self):
