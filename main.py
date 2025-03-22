@@ -4,23 +4,6 @@ from tkinter import ttk
 from random import randint
 
 
-class InsuranceProgram:
-    """
-        Класс описывающий конфигурацию страховой программы
-    """
-
-    def __init__(self,prog_id:int = None,prog_type:str = None,time:int = None,price:int = None,max_refund:int = None):
-
-        self.prog_id : int = prog_id
-        self.prog_type : str = prog_type
-
-        # три главных параметра программы
-        self.time : int = time 
-        self.price : int = price
-        self.max_refund : int = max_refund
-
-
-
 class InsuranceAgreement:
     """
         Класс описывает объект страхового договора. 
@@ -29,15 +12,18 @@ class InsuranceAgreement:
         которую они подписали.
     """
 
-    def __init__(self,prog_id: int, prog_config:InsuranceProgram):
+    def __init__(self,prog_id: int, prog_type: str, prog_price: int, prog_time: int, prog_refund: int):
+        # параметры страховой программы
         self.prog_id: int = prog_id
-        self.prog_type: str = prog_config.prog_type 
-
+        self.prog_type: str = prog_type
+        self.prog_price: int = prog_price
+        self.prog_time: int = prog_time
+        self.prog_refund: int = prog_refund
+        
         self.has_clients: bool = False 
         self.client_list: list[int] = [] 
         self.case_dates: list[int] = [] 
 
-        self.prog_config : InsuranceProgram
 
 
     def add_clients(client_arr:list[int]) -> None:
@@ -50,6 +36,9 @@ class InsuranceAgreement:
         Возвращает сумму денежной компенсации на текущей итерации по данному страховому договору
         """
         pass
+
+    def __repr__(self):
+        return f"Prog_id: {self.prog_id}, prog_type: {self.prog_type}, clients: {self.client_list}"
     
 
 class InsuranceComp:
@@ -86,11 +75,11 @@ class InsuranceComp:
         self.progs_active: List[int] = [] 
         self.ins_agreements: Dict[int,InsuranceAgreement] = dict()
 
-    """ Управление состоянием страховой компании """
+    """ Инициализация """
     
     def init_state(self) -> None:
-        self.init_programs_state()
         self.init_slider_vars()
+        self.init_programs_state()
 
         return
 
@@ -104,15 +93,14 @@ class InsuranceComp:
 
         # инициализация начальных страховых программ
         self.progs_active.append(self.cur_autoprog_id)
-        self.ins_agreements[self.cur_autoprog_id] = InsuranceAgreement(self.cur_autoprog_id,InsuranceProgram())
+        self.ins_agreements[self.cur_autoprog_id] = self.create_ins_agr("auto",self.cur_autoprog_id)
 
         self.progs_active.append(self.cur_estateprog_id)
-        self.ins_agreements[self.cur_estateprog_id] = InsuranceAgreement(self.cur_estateprog_id,InsuranceProgram())
+        self.ins_agreements[self.cur_estateprog_id] = self.create_ins_agr("estate",self.cur_estateprog_id)
 
         self.progs_active.append(self.cur_medprog_id)
-        self.ins_agreements[self.cur_medprog_id] = InsuranceAgreement(self.cur_medprog_id,InsuranceProgram())
+        self.ins_agreements[self.cur_medprog_id] = self.create_ins_agr("med",self.cur_medprog_id)
  
-
         return 
     
     # инициализация текущих переменных параметров страхования
@@ -129,6 +117,30 @@ class InsuranceComp:
     def update_client_state(self,auto_demand,estate_demand = None,med_demand = None):
         # смотрим, не обновились ли у нас условия страхования
         pass
+    
+    # создание страхового договора определённого типа по заданным условиям
+    def create_ins_agr(self,prog_type:str,prog_id: int)-> InsuranceAgreement:
+        if prog_type == "auto":
+            prog_price = self.auto_slider_price.get()
+            prog_refund = self.auto_slider_refund.get()
+            prog_time = self.auto_slider_time.get() 
+
+        # пока что привязаны к слайдерам от автостраховки
+        elif prog_type == "estate":
+            prog_price = self.auto_slider_price.get()
+            prog_refund = self.auto_slider_refund.get()
+            prog_time = self.auto_slider_time.get() 
+
+        elif prog_type == "med":
+            prog_price = self.auto_slider_price.get()
+            prog_refund = self.auto_slider_refund.get()
+            prog_time = self.auto_slider_time.get() 
+
+        else:
+            raise ValueError
+        
+        
+        return InsuranceAgreement(prog_id,prog_type,prog_price,prog_time,prog_refund)
     
 
     def reset(self) -> None:
@@ -193,7 +205,8 @@ class InsuranceComp:
 
     def print_programs(self):
         print(f"Кол-во клиентов: {self.client_num}")
-        print(f"Существующие программы страхования (id): {self.progs_active}")
+        for id in self.progs_active:
+            print(self.ins_agreements[id])
 
         return
 
@@ -412,7 +425,7 @@ class MainController:
         self.reset_loss() 
 
         self.modeling_started = False
-        self.modeling_finished = False 
+        self.modeling_finished = False   
 
         # reset страховой компании  
         self.ins_company.reset() 
