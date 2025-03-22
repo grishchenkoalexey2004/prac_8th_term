@@ -9,7 +9,7 @@ class InsuranceProgram:
         Класс описывающий конфигурацию страховой программы
     """
 
-    def __init__(self,prog_id:int,prog_type:str,time:int,price:int,max_refund:int):
+    def __init__(self,prog_id:int = None,prog_type:str = None,time:int = None,price:int = None,max_refund:int = None):
 
         self.prog_id : int = prog_id
         self.prog_type : str = prog_type
@@ -78,9 +78,9 @@ class InsuranceComp:
         self.last_program_id = 0 
 
         # id текущих программ страхования различных типов
-        self.active_autoprog_id = None 
-        self.active_estateprog_id = None 
-        self.active_medprog_id = None 
+        self.cur_autoprog_id = None 
+        self.cur_estateprog_id = None 
+        self.cur_medprog_id = None 
 
         # "база" клиентов
         self.progs_active: List[int] = [] 
@@ -96,15 +96,22 @@ class InsuranceComp:
 
     # инициализация переменных отслеживания программ страхования
     def init_programs_state(self) -> None:
-        self.active_autoprog_id = 0 
-        self.active_estateprog_id = 1 
-        self.active_medprog_id = 2 
+        self.cur_autoprog_id = 0 
+        self.cur_estateprog_id = 1 
+        self.cur_medprog_id = 2 
 
         self.last_program_id = 2 
 
-        self.progs_active.append(self.active_autoprog_id)
-        self.progs_active.append(self.active_estateprog_id)
-        self.progs_active.append(self.active_medprog_id)
+        # инициализация начальных страховых программ
+        self.progs_active.append(self.cur_autoprog_id)
+        self.ins_agreements[self.cur_autoprog_id] = InsuranceAgreement(self.cur_autoprog_id,InsuranceProgram())
+
+        self.progs_active.append(self.cur_estateprog_id)
+        self.ins_agreements[self.cur_estateprog_id] = InsuranceAgreement(self.cur_estateprog_id,InsuranceProgram())
+
+        self.progs_active.append(self.cur_medprog_id)
+        self.ins_agreements[self.cur_medprog_id] = InsuranceAgreement(self.cur_medprog_id,InsuranceProgram())
+ 
 
         return 
     
@@ -123,14 +130,6 @@ class InsuranceComp:
         # смотрим, не обновились ли у нас условия страхования
         pass
     
-    
-    def print_slider_values(self):
-        print(f"Auto price: {self.auto_slider_price.get()}")
-        print(f"Auto time: {self.auto_slider_time.get()}")
-        print(f"Auto refund: {self.auto_slider_refund.get()}")
-        print(f"Auto demand: {self.auto_slider_base_demand.get()}")
-
-        return 
 
     def reset(self) -> None:
         self.reset_programs()
@@ -182,7 +181,22 @@ class InsuranceComp:
         self.update_client_state(auto_demand)
 
         return return_object
+
+    def print_slider_values(self):
+        print(f"Auto price: {self.auto_slider_price.get()}")
+        print(f"Auto time: {self.auto_slider_time.get()}")
+        print(f"Auto refund: {self.auto_slider_refund.get()}")
+        print(f"Auto demand: {self.auto_slider_base_demand.get()}")
+
+        return 
     
+
+    def print_programs(self):
+        print(f"Кол-во клиентов: {self.client_num}")
+        print(f"Существующие программы страхования (id): {self.progs_active}")
+
+        return
+
 
 class MainController:
     """
@@ -203,7 +217,14 @@ class MainController:
         self.cur_profit : int = 0 
         self.cur_loss : int = 0
 
+        # количественные показатели
+        self.auto_sold : int = 0 
+        self.estate_sold : int = 0 
+        self.med_sold : int = 0 
+
+        # налог
         self.tax_percent = 5
+        self.tax_value = 0
 
         self.ins_company : InsuranceComp = InsuranceComp()
 
@@ -224,7 +245,6 @@ class MainController:
         # запускаем конструктор интерфейса 
         self.init_gui()
 
-        
         # Запускаем главный цикл обработки событий
         self.root.mainloop()
 
@@ -334,13 +354,16 @@ class MainController:
     """ Методы выполнения итерации """
 
     def simulate_month(self) -> None:
+        self.reset_sell()
+        self.reset_loss()
 
         sell_stats = self.ins_company.gen_demand()
-        print(sell_stats)
+        self.update_sell(sell_stats)
 
+        # пока не работает
+        loss_stats = self.ins_company.gen_ins_cases()
 
-        self.print_finance()
-        self.print_sliders() 
+        self.print_state()
         self.curmonth += 1
 
         # временно поставил 10 - конец симуляции по времени
@@ -348,27 +371,67 @@ class MainController:
             print("Симуляция завершена")
             self.modeling_finished = True 
 
-
         if self.networth<0:
             print("Компания обанкротилась")
             self.is_bankrupt = True
 
+    # обнуляет показатели связанные с продажей
+    def reset_sell(self):
+        self.auto_sold = 0 
+        self.med_sold = 0
+        self.estate_sold = 0 
+        self.cur_profit = 0 
 
+        return 
+
+    # изменяет внутренее состояние после прибыли от продажи страховок
+    def update_sell(self,sell_stats:Dict[str,Tuple[int,int]]):
+        auto_sold_quantity,auto_profit = sell_stats["auto"]
+        self.auto_sold = auto_sold_quantity
+        self.cur_profit += auto_profit
+
+
+
+        self.networth += self.cur_profit
+
+    
+    # изменяет внутренее состояние после убытков в виде налогов и страховых случаев
+    def update_loss(self) -> None: 
+        pass
+
+    def reset_loss(self) -> None:
+        self.loss = 0 
+        self.tax_value = 0 
 
     def reset(self) -> None:
 
         self.networth = 100
         self.curmonth = 1 
 
-        self.modeling_started = False 
+        self.reset_sell() 
+        self.reset_loss() 
+
+        self.modeling_started = False
+        self.modeling_finished = False 
 
         # reset страховой компании  
         self.ins_company.reset() 
 
 
+    """ Методы вывода (вывод значений слайдеров, фин. и количественных показателей)"""
+
+    def print_state(self) -> None:
+        print("-----------------------------------------")
+        self.print_finance() 
+        self.print_quantity()
+        self.print_sliders()
+        self.ins_company.print_programs()
+        print("-----------------------------------------")
+
 
     def print_finance(self) -> None:
         print(f"Текущий месяц: {self.curmonth}")
+
         print(f"Капитал: {self.networth}")
         print(f"Прибыль: {self.cur_profit}")
         print(f"Убыток: {self.cur_loss}")
@@ -377,6 +440,12 @@ class MainController:
 
     def print_sliders(self) -> None:
         self.ins_company.print_slider_values()
+        return 
+    
+    # вывод количества проданных страховок различного типа
+    def print_quantity(self) -> None:
+        print(f"Количество проданных автостраховок {self.auto_sold}")
+
         return 
 
 
