@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-
+# пример простейшего интерфейса для справки
 
 def on_button_click():
     # Получаем значения из ползунков и числовых полей

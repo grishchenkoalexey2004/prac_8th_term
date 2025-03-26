@@ -14,8 +14,10 @@
 """
 
 
-from typing import Dict,Tuple
+from typing import Dict,Tuple,List
 import tkinter as tk
+from random import randint
+from numpy.random import binomial,uniform,choice
 
 
 class InsuranceAgreement:
@@ -33,11 +35,17 @@ class InsuranceAgreement:
         self.prog_price: int = prog_price
         self.prog_time: int = prog_time
         self.prog_refund: int = prog_refund
+
+        # параметры генерации страховых случаев
+        self.insurance_prob: float = 0.05 # будет настраиваемым параметром
+        self.days_prob : List[float] = [1/self.prog_time for i in range(self.prog_time)]
         
         # флаг наличия клиентов, подписавших договор
         self.has_clients: bool = False 
         # на 0-ой позиции - кол-во клиентов у которых 1 мес до истечения договора, на второй ...
-        self.client_list: list[int] = [0 for i in range(prog_time)]
+        self.client_list: List[int] = [0 for i in range(prog_time)]
+        # на 0-ой позиции - кол-во страховых случаев, которые наступят в ближайший месяц, на 1-ой ... 
+        self.insurance_cases: List[int] = [0 for i in range(prog_time)]
 
     # добавляет новых клиентов, подписавших договор на текущей итерации
     def add_clients(self,client_num:int) -> None:
@@ -45,15 +53,45 @@ class InsuranceAgreement:
             self.has_clients = True
 
         self.client_list[self.prog_time-1] = client_num
-
+        self.calc_insurance_cases(client_num)
         return
+    
+    # предварительное вычисление страховых случаев для добавляемой группы клиентов
+    def calc_insurance_cases(self,client_num:int) -> None:
+        # количество страховых случаев
+        num_cases = binomial(n = client_num,p = self.insurance_prob,size = None)
 
-    def gen_insurance_cases() -> int:
+        # распределение страховых случаев по дням
+        positions = choice(self.prog_time,size = num_cases,p=self.days_prob)
+        for day in positions:
+            self.insurance_cases[day]+=1
+
+        return 
+    
+
+    def gen_ins_cases(self) -> int:
         """
         Активирует заранее вычисленные страховые случаи
         Возвращает сумму денежной компенсации на текущей итерации по данному страховому договору
-        """
-        pass
+        Обновляет массив с вычисленными страховыми случаями
+        """ 
+
+        ins_case_num = self.insurance_cases[0]
+        refund_value = ins_case_num*self.prog_refund #! пока возвращает полную сумму, а должна возвращать процент
+        
+        self.update_ins_cases()
+
+        return refund_value
+
+
+    def update_ins_cases(self) -> None:
+        
+        for i in range(len(self.insurance_cases)-1):
+            self.insurance_cases[i] = self.insurance_cases[i+1]
+
+        self.insurance_cases[-1] = 0
+
+        return  
     
     
     def update_dates(self) -> int:
@@ -71,7 +109,7 @@ class InsuranceAgreement:
         return deleted_count  
     
     def __repr__(self):
-        return f"Prog_id: {self.prog_id}, prog_type: {self.prog_type}, clients: {self.client_list}"
+        return f"Prog_id: {self.prog_id}, prog_type: {self.prog_type}, clients: {self.client_list},ins_cases: {self.insurance_cases} "
     
 
 class InsuranceComp:
@@ -228,12 +266,14 @@ class InsuranceComp:
         self.init_programs_state()
         return 
 
-    def gen_ins_cases(self) -> Dict[str,int]:
-        pass 
- 
+    # возвращает кол-во и сумму страховых возвратов по категориям страховок
+    def gen_ins_cases(self) -> int: #! пока возвр. int, потом будет Dict[str,Tuple(int,int)]
 
-    def delete_ins_prog(ins_prog_id:int) -> None: 
-        pass 
+        refund_sum = 0 
+        for id in self.progs_active:
+            refund_sum+=self.ins_agreements[id].gen_ins_cases()
+
+        return refund_sum
 
 
     """ Генерация спроса, подсчёт прибыли """
@@ -270,5 +310,24 @@ class InsuranceComp:
         return
     
 
+# testing insurance case generation 
+# generation is performed by calculation of insurance cases in the group and distribution of them 
 if __name__ == "__main__":
-    pass
+    number = int(input())
+    days = 12
+
+    p = 0.05
+
+    res = binomial(number,p = p,size = None)
+    
+
+
+    probs = [1/days for i in range(days)]
+    
+
+    positions = choice(days,size = res,p=probs)
+
+
+
+    print(res)
+    print(positions)

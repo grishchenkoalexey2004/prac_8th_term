@@ -26,11 +26,13 @@ class MainController:
         self.networth = 100
         self.cur_profit : int = 0 
         self.cur_loss : int = 0
+        self.cur_net_profit : int = 0 
 
         # количественные показатели
         self.auto_sold : int = 0 
         self.estate_sold : int = 0 
         self.med_sold : int = 0 
+
 
         # налог
         self.tax_percent = 5
@@ -172,6 +174,7 @@ class MainController:
 
         # пока не работает
         loss_stats = self.ins_company.gen_ins_cases()
+        self.update_loss(loss_stats)
 
         self.print_state()
 
@@ -188,14 +191,6 @@ class MainController:
             print("Компания обанкротилась")
             self.is_bankrupt = True
 
-    # обнуляет показатели связанные с продажей
-    def reset_sell(self):
-        self.auto_sold = 0 
-        self.med_sold = 0
-        self.estate_sold = 0 
-        self.cur_profit = 0 
-
-        return 
 
     # изменяет внутренее состояние после прибыли от продажи страховок
     def update_sell(self,sell_stats:Dict[str,Tuple[int,int]]):
@@ -203,13 +198,26 @@ class MainController:
         self.auto_sold = auto_sold_quantity
         self.cur_profit += auto_profit
 
-
+        self.cur_net_profit += self.cur_profit
         self.networth += self.cur_profit
 
     
     # изменяет внутренее состояние после убытков в виде налогов и страховых случаев
-    def update_loss(self) -> None: 
-        pass
+    def update_loss(self,loss:int) -> None: #! пока принимает int, потом будет принимать 
+        self.cur_loss = loss
+        self.cur_net_profit -= loss
+
+        return 
+        
+    # обнуляет показатели связанные с продажей
+    def reset_sell(self):
+        self.auto_sold = 0 
+        self.med_sold = 0
+        self.estate_sold = 0 
+
+        self.cur_profit = 0 
+        self.cur_net_profit = 0
+        return 
 
     def reset_loss(self) -> None:
         self.loss = 0 
@@ -236,7 +244,6 @@ class MainController:
         print("-----------------------------------------")
         self.print_finance() 
         self.print_quantity()
-        self.print_sliders()
         self.ins_company.print_programs()
         print("-----------------------------------------")
 
@@ -247,6 +254,7 @@ class MainController:
         print(f"Капитал: {self.networth}")
         print(f"Прибыль: {self.cur_profit}")
         print(f"Убыток: {self.cur_loss}")
+        print(f"Чистая прибыль: {self.cur_net_profit}")
 
         return 
 
