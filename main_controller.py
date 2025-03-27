@@ -8,6 +8,7 @@ from ins_comp import InsuranceComp
 from tkinter import ttk
 
 
+
 class MainController:
     """
         Главный класс, отвечающий за взаимодействие между интерфейсом и всеми остальными классами
@@ -22,27 +23,38 @@ class MainController:
         # номер текущего месяца
         self.curmonth : int = 1
 
-        # финансовые показатели
+        """ Финансовые и количественные показатели (прибыль,убыток,колво страх. случаев)"""
         self.networth = 100
         self.cur_profit : int = 0 
         self.cur_loss : int = 0
         self.cur_net_profit : int = 0 
 
         # количественные показатели
-        self.auto_sold : int = 0 
-        self.estate_sold : int = 0 
-        self.med_sold : int = 0 
+        self.cur_auto_sold : int = 0 
+        self.cur_estate_sol : int = 0 
+        self.cur_med_sold : int = 0 
 
-
+        self.cur_auto_ins_cases : int = 0
+        self.cur_estate_ins_cases : int = 0 
+        self.cur_med_ins_cases : int = 0 
+    
         # налог
         self.tax_percent = 5
         self.tax_value = 0
 
         self.ins_company : InsuranceComp = InsuranceComp()
 
-        """ Переменные графического интерфейса в зоне ответственности MainController """
+        """ Переменные графического интерфейса, параметры моделирования"""
 
+
+        # корень к которому все элементы цепляются
         self.root : tk.Tk = None
+
+        # Текущие значения слайдеров автостраховки (нельзя определять до построения интерфейса, поэтому None)
+        self.auto_slider_price : tk.Variable = None
+        self.auto_slider_time : tk.Variable = None
+        self.auto_slider_refund : tk.Variable = None
+        self.auto_slider_base_demand : tk.Variable = None
 
 
     # процедура запуска всей программы
@@ -51,7 +63,8 @@ class MainController:
         # создание корня интерфейса
         self.init_root() 
 
-        # инициализация страховой компании (внутри неё есть перем., используемые интерфейсом)
+        self.init_slider_vars()
+
         self.ins_company.init_state()
 
         # запускаем конструктор интерфейса 
@@ -65,39 +78,38 @@ class MainController:
     def init_root(self) -> None:
         self.root = tk.Tk()
         self.root.title("Моделирование работы страховой компании")
-        
         return
+
+    def init_slider_vars(self) -> None:
+        self.auto_slider_price = tk.Variable(value = 5)
+        self.auto_slider_time : tk.Variable = tk.Variable(value = 5)
+        self.auto_slider_refund : tk.Variable = tk.Variable(value = 50)
+        self.auto_slider_base_demand : tk.Variable = tk.Variable(value = 10)
 
     def init_gui(self) -> None:
 
         # Создаем главное окно
-        
-
         params_label = ttk.Label(self.root,text="ПАРАМЕТРЫ",font=("Arial",20))
         params_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # Инициализируем переменные, хранящие значения слайдеров для параметров договора:
-
-        self.ins_company.init_slider_vars()
-
-        """ Создание слайдеров настройки программ страхования """
+        """ Создание слайдеров настройки программ автострахования """
 
         auto_slider_label = ttk.Label(self.root, text="АВТО:",font=("Arial",16))
         auto_slider_label.grid(row=1, column=0, padx=10, pady=10)
 
         # сладер стоимости страховки
         auto_slider_price = tk.Scale(self.root, from_=3, to=10, orient="horizontal",label = "цена",resolution =1,
-                                     variable = self.ins_company.auto_slider_price,command = self.set_auto_update_flag)
+                                     variable = self.auto_slider_price,command = self.auto_update_config)
         auto_slider_price.grid(row=1, column=1, padx=10, pady=10)
 
         # слайдер времени действия
         auto_slider_time = tk.Scale(self.root, from_=3, to=12, orient="horizontal",label = "время",resolution =1,
-                                    variable = self.ins_company.auto_slider_time,command = self.set_auto_update_flag)
+                                    variable = self.auto_slider_time,command = self.auto_update_config)
         auto_slider_time.grid(row=1, column=2, padx=10, pady=10)
 
         # слайдер возмещения
         auto_slider_refund = tk.Scale(self.root, from_=0, to=100, orient="horizontal",label = "возврат",resolution =1,
-                                      variable = self.ins_company.auto_slider_refund,command = self.set_auto_update_flag)
+                                      variable = self.auto_slider_refund,command = self.auto_update_config)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
         # слайдер базового спроса автостраховки
@@ -105,7 +117,7 @@ class MainController:
         auto_slider_label.grid(row=2, column=0, padx=10, pady=10)
 
         auto_slider_demand = tk.Scale(self.root, from_=2, to=20, orient="horizontal",resolution =1,
-                                      variable = self.ins_company.auto_slider_base_demand)
+                                      variable = self.auto_slider_base_demand)
         auto_slider_demand.grid(row=2, column=1, padx=10, pady=10)
 
         """ Создание кнопок """
@@ -159,8 +171,12 @@ class MainController:
 
     """ Обработчики слайдеров """
 
-    def set_auto_update_flag(self,event):
+    def auto_update_config(self,event):
         self.ins_company.auto_config_updated = True 
+        self.ins_company.auto_slider_price = int(self.auto_slider_price.get() )
+        self.ins_company.auto_slider_time = int(self.auto_slider_time.get() )
+        self.ins_company.auto_slider_refund = int(self.auto_slider_refund.get())
+        self.ins_company.auto_slider_base_demand = int(self.auto_slider_base_demand.get())
         return 
 
     """ Методы выполнения итерации """
@@ -195,7 +211,7 @@ class MainController:
     # изменяет внутренее состояние после прибыли от продажи страховок
     def update_sell(self,sell_stats:Dict[str,Tuple[int,int]]):
         auto_sold_quantity,auto_profit = sell_stats["auto"]
-        self.auto_sold = auto_sold_quantity
+        self.cur_auto_sold = auto_sold_quantity
         self.cur_profit += auto_profit
 
         self.cur_net_profit += self.cur_profit
@@ -203,25 +219,50 @@ class MainController:
 
     
     # изменяет внутренее состояние после убытков в виде налогов и страховых случаев
-    def update_loss(self,loss:int) -> None: #! пока принимает int, потом будет принимать 
-        self.cur_loss = loss
-        self.cur_net_profit -= loss
+    def update_loss(self,loss:Tuple[int,int]) -> None: #! пока принимает int, потом будет принимать 
+        self.cur_loss = loss[1]
+        self.cur_net_profit -= loss[1]
+
+        self.cur_auto_ins_cases = loss[0]
 
         return 
         
     # обнуляет показатели связанные с продажей
     def reset_sell(self):
-        self.auto_sold = 0 
-        self.med_sold = 0
-        self.estate_sold = 0 
+        self.cur_auto_sold = 0 
+        self.cur_med_sold = 0
+        self.cur_estate_sol = 0 
 
         self.cur_profit = 0 
         self.cur_net_profit = 0
         return 
 
     def reset_loss(self) -> None:
+
         self.loss = 0 
         self.tax_value = 0 
+
+        self.cur_auto_ins_cases = 0
+        self.cur_estate_ins_cases = 0 
+        self.cur_med_ins_cases = 0 
+
+        return 
+    
+
+    def reset_slider_vars(self) -> None:
+        self.auto_config_updated = False 
+        
+        self.auto_slider_price.set(5)
+        self.auto_slider_time.set(5)
+        self.auto_slider_refund.set(50)
+        self.auto_slider_base_demand.set(10)
+        self.ins_company.auto_slider_price = 5 
+        self.ins_company.auto_slider_time = 5 
+        self.ins_company.auto_slider_refund = 50
+        self.auto_slider_base_demand = 10 
+
+        return 
+
 
     def reset(self) -> None:
 
@@ -264,8 +305,8 @@ class MainController:
     
     # вывод количества проданных страховок различного типа
     def print_quantity(self) -> None:
-        print(f"Количество проданных автостраховок {self.auto_sold}")
-
+        print(f"Количество проданных автостраховок: {self.cur_auto_sold}")
+        print(f"Количество страховых случаев (авто): {self.cur_auto_ins_cases}")
         return 
     
 

@@ -7,15 +7,12 @@
 
     InsuranceComp - класс описывающий страховую компанию
     Страховая компания хранит в себе информацию о текущих параметрах моделирования, а также страховых договорах,
-    которые актуальны или еще имеют клиентов.
-
-
+    которые актуальны или пока еще имеют клиентов.
 
 """
 
 
 from typing import Dict,Tuple,List
-import tkinter as tk
 from random import randint
 from numpy.random import binomial,uniform,choice
 
@@ -69,11 +66,13 @@ class InsuranceAgreement:
         return 
     
 
-    def gen_ins_cases(self) -> int:
+    def gen_ins_cases(self) -> Tuple[int,int]:
         """
-        Активирует заранее вычисленные страховые случаи
-        Возвращает сумму денежной компенсации на текущей итерации по данному страховому договору
-        Обновляет массив с вычисленными страховыми случаями
+        1)Активирует заранее вычисленные страховые случаи
+
+        2)Возвращает колво денежных компенсаций, а также сумму общую сумму денежной компенсации на текущей итерации 
+
+        3)Обновляет массив с вычисленными страховыми случаями
         """ 
 
         ins_case_num = self.insurance_cases[0]
@@ -81,7 +80,7 @@ class InsuranceAgreement:
         
         self.update_ins_cases()
 
-        return refund_value
+        return (ins_case_num,refund_value)
 
 
     def update_ins_cases(self) -> None:
@@ -121,19 +120,7 @@ class InsuranceComp:
 
         self.client_num: int = 0 
 
-        # флаги обновления конфигурации страховых программ
-        self.auto_config_updated : bool = False
-        self.estate_config_updated : bool = False 
-        self.med_config_updated : bool = False
-
-        """ Переменные интерфейса в зоне ответственности InsuranceComp"""
-
-        # Текущие значения слайдеров автостраховки (нельзя определять до построения интерфейса)
-        self.auto_slider_price : tk.Variable = None
-        self.auto_slider_time : tk.Variable = None   
-        self.auto_slider_refund : tk.Variable = None
-        self.auto_slider_base_demand : tk.Variable = None
-
+        
         # id созданной в последний раз программы страховки
         self.last_program_id = 0 
 
@@ -146,10 +133,23 @@ class InsuranceComp:
         self.progs_active: List[int] = [] 
         self.ins_agreements: Dict[int,InsuranceAgreement] = dict()
 
+
+        """ Параметры моделирования и флаги"""
+
+        self.auto_config_updated = False 
+        self.med_config_updated = False 
+        self.estate_config_updated = False 
+
+        # условия автостраховки (c заданными начальными значениями)
+        self.auto_slider_price : int =  5
+        self.auto_slider_time : int = 5
+        self.auto_slider_refund : int = 50 
+        self.auto_slider_base_demand : int = 10
+
+
     """ Инициализация """
     
     def init_state(self) -> None:
-        self.init_slider_vars()
         self.init_programs_state()
 
         return
@@ -170,15 +170,6 @@ class InsuranceComp:
 
         return 
     
-    # инициализация текущих переменных параметров страхования
-    def init_slider_vars(self) -> None: 
-        # временно поставил дефолтные значения
-        self.auto_slider_price = tk.Variable(value = 5)
-        self.auto_slider_time = tk.Variable(value = 5)
-        self.auto_slider_refund = tk.Variable(value = 50)
-        self.auto_slider_base_demand = tk.Variable(value = 10)
-
-        return 
     
     """ Обновление на каждой итерации"""
     
@@ -209,23 +200,23 @@ class InsuranceComp:
         
         return
     
-    # создание страхового договора определённого типа по заданным условиям
+    # создание объекта страхового договора определённого типа по заданным условиям
     def create_ins_agr(self,prog_type:str,prog_id: int)-> InsuranceAgreement:
         if prog_type == "auto":
-            prog_price = self.auto_slider_price.get()
-            prog_refund = self.auto_slider_refund.get()
-            prog_time = self.auto_slider_time.get() 
+            prog_price = self.auto_slider_price
+            prog_refund = self.auto_slider_refund
+            prog_time = self.auto_slider_time
 
         # пока что привязаны к слайдерам от автостраховки
         elif prog_type == "estate":
-            prog_price = self.auto_slider_price.get()
-            prog_refund = self.auto_slider_refund.get()
-            prog_time = self.auto_slider_time.get() 
+            prog_price = self.auto_slider_price
+            prog_refund = self.auto_slider_refund
+            prog_time = self.auto_slider_time
 
         elif prog_type == "med":
-            prog_price = self.auto_slider_price.get()
-            prog_refund = self.auto_slider_refund.get()
-            prog_time = self.auto_slider_time.get() 
+            prog_price = self.auto_slider_price
+            prog_refund = self.auto_slider_refund
+            prog_time = self.auto_slider_time 
 
         else:
             raise ValueError
@@ -244,17 +235,7 @@ class InsuranceComp:
     
     def reset(self) -> None:
         self.reset_programs()
-        self.reset_slider_vars()
-
-    def reset_slider_vars(self) -> None:
-        self.auto_config_updated = False 
-        
-        self.auto_slider_price.set(5)
-        self.auto_slider_time.set(5)
-        self.auto_slider_refund.set(50)
-        self.auto_slider_base_demand.set(10)
-
-        return 
+    
     
     def reset_programs(self) -> None: 
         self.last_program_id = 0 
@@ -268,12 +249,16 @@ class InsuranceComp:
 
     # возвращает кол-во и сумму страховых возвратов по категориям страховок
     def gen_ins_cases(self) -> int: #! пока возвр. int, потом будет Dict[str,Tuple(int,int)]
+        
+        total_cases = 0 
+        total_refund_sum = 0 
 
-        refund_sum = 0 
         for id in self.progs_active:
-            refund_sum+=self.ins_agreements[id].gen_ins_cases()
+            ins_cases,refund_sum = self.ins_agreements[id].gen_ins_cases()
+            total_cases += ins_cases
+            total_refund_sum += refund_sum 
 
-        return refund_sum
+        return (total_cases,total_refund_sum)
 
 
     """ Генерация спроса, подсчёт прибыли """
@@ -282,10 +267,11 @@ class InsuranceComp:
 
     def gen_demand(self) -> Dict[str,Tuple[int,int]]:
         # вычисление коэ-фта выгодности 
-        auto_profit_coef = (self.auto_slider_refund.get()*self.auto_slider_time.get())/self.auto_slider_price.get()
+        
+        auto_profit_coef = (self.auto_slider_refund*self.auto_slider_time)/self.auto_slider_price
         auto_add_demand = int(auto_profit_coef//10)
-        auto_demand = self.auto_slider_base_demand.get() + auto_add_demand + randint(-1*auto_add_demand,5)
-        auto_profit = auto_demand*self.auto_slider_price.get()
+        auto_demand = self.auto_slider_base_demand + auto_add_demand + randint(-1*auto_add_demand,5)
+        auto_profit = auto_demand*self.auto_slider_price
 
 
         return_object = {"auto" : (auto_demand,auto_profit)}
@@ -294,10 +280,10 @@ class InsuranceComp:
         return return_object
 
     def print_slider_values(self):
-        print(f"Auto price: {self.auto_slider_price.get()}")
-        print(f"Auto time: {self.auto_slider_time.get()}")
-        print(f"Auto refund: {self.auto_slider_refund.get()}")
-        print(f"Auto demand: {self.auto_slider_base_demand.get()}")
+        print(f"Auto price: {self.auto_slider_price}")
+        print(f"Auto time: {self.auto_slider_time}")
+        print(f"Auto refund: {self.auto_slider_refund}")
+        print(f"Auto demand: {self.auto_slider_base_demand}")
 
         return 
     
