@@ -1,10 +1,10 @@
 
 
 
-from main_controller import MainController 
+from interface import Interface 
 
 
-main_controller = MainController()
+interface = Interface()
 
-main_controller.run() 
+interface.run() 
 
