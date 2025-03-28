@@ -34,7 +34,6 @@ class InsuranceAgreement:
         self.prog_refund: int = prog_refund
 
         # параметры генерации страховых случаев
-        self.insurance_prob: float = 0.05 # будет настраиваемым параметром
         self.days_prob : List[float] = [1/self.prog_time for i in range(self.prog_time)]
         
         # флаг наличия клиентов, подписавших договор
@@ -44,19 +43,19 @@ class InsuranceAgreement:
         # на 0-ой позиции - кол-во страховых случаев, которые наступят в ближайший месяц, на 1-ой ... 
         self.insurance_cases: List[int] = [0 for i in range(prog_time)]
 
-    # добавляет новых клиентов, подписавших договор на текущей итерации
-    def add_clients(self,client_num:int) -> None:
+    # добавляет новых клиентов, подписавших договор на текущей итерации + заранее вычисляет страховые случаи
+    def add_clients(self,client_num : int,insurance_prob : float) -> None:
         if client_num!=0:
             self.has_clients = True
 
         self.client_list[self.prog_time-1] = client_num
-        self.calc_insurance_cases(client_num)
+        self.calc_insurance_cases(client_num,insurance_prob)
         return
     
     # предварительное вычисление страховых случаев для добавляемой группы клиентов
-    def calc_insurance_cases(self,client_num:int) -> None:
+    def calc_insurance_cases(self,client_num:int,insurance_prob : float) -> None:
         # количество страховых случаев
-        num_cases = binomial(n = client_num,p = self.insurance_prob,size = None)
+        num_cases = binomial(n = client_num,p = insurance_prob,size = None)
 
         # распределение страховых случаев по дням
         positions = choice(self.prog_time,size = num_cases,p=self.days_prob)
@@ -106,6 +105,7 @@ class InsuranceAgreement:
         self.client_list[-1] = 0
 
         return deleted_count  
+
     
     def __repr__(self):
         return f"Prog_id: {self.prog_id}, prog_type: {self.prog_type}, clients: {self.client_list},ins_cases: {self.insurance_cases} "
@@ -139,6 +139,10 @@ class InsuranceComp:
         self.auto_config_updated = False 
         self.med_config_updated = False 
         self.estate_config_updated = False 
+
+        # вероятность возникновения страхвого случая
+        self.insurance_prob: float = 0.05 # будет настраиваемым параметром
+
 
         # условия автостраховки (c заданными начальными значениями)
         self.auto_slider_price : int =  5
@@ -177,7 +181,7 @@ class InsuranceComp:
     def update_client_state(self,auto_demand,estate_demand = None,med_demand = None) -> None:
         # смотрим, не обновились ли у нас условия страхования
         
-        # если обновились условия страхования - создаём новый договор
+        # если обновились условия страхования - создаём новый договор и меняем id действующего страхового договора
         if self.auto_config_updated:
             self.last_program_id+=1
             self.cur_autoprog_id = self.last_program_id
@@ -187,9 +191,9 @@ class InsuranceComp:
 
             self.auto_config_updated = False
 
-        self.ins_agreements[self.cur_autoprog_id].add_clients(auto_demand)
+        # добавляем клиентов в действующий страховой договор
+        self.ins_agreements[self.cur_autoprog_id].add_clients(auto_demand,insurance_prob=self.insurance_prob)
         
-
         # нужно добавить такую же логику про остальные типы страховок
         return None 
 
@@ -199,6 +203,12 @@ class InsuranceComp:
             self.ins_agreements[prog_id].update_dates()
         
         return
+    
+    def update_case_percent(self,percent:int):
+        for id in self.progs_active:
+            self.ins_agreements[id].insurance_prob  = percent/100
+
+        return 
     
     # создание объекта страхового договора определённого типа по заданным условиям
     def create_ins_agr(self,prog_type:str,prog_id: int)-> InsuranceAgreement:
@@ -235,6 +245,9 @@ class InsuranceComp:
     
     def reset(self) -> None:
         self.reset_programs()
+        self.reset_ins_prob()
+
+        return 
     
     
     def reset_programs(self) -> None: 
@@ -246,9 +259,12 @@ class InsuranceComp:
         # создаем начальные значения после сброса
         self.init_programs_state()
         return 
+    
+    def reset_ins_prob(self):
+        self.insurance_prob = 0.07
 
     # возвращает кол-во и сумму страховых возвратов по категориям страховок
-    def gen_ins_cases(self) -> int: #! пока возвр. int, потом будет Dict[str,Tuple(int,int)]
+    def gen_ins_cases(self) -> Tuple[int,int]: #! пока возвр. int, потом будет Dict[str,Tuple(int,int)]
         
         total_cases = 0 
         total_refund_sum = 0 

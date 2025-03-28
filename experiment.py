@@ -50,12 +50,17 @@ class Experiment:
         self.reset_sell()
         self.reset_loss()
 
+        # подсчёт прибыли 
         sell_stats = self.ins_company.gen_demand()
         self.update_sell(sell_stats)
 
-        # пока не работает
+        # подсчёт убытка
         loss_stats = self.ins_company.gen_ins_cases()
         self.update_loss(loss_stats)
+
+        # обновление чистой прибыли и капитала
+        self.cur_net_profit = self.cur_profit - self.cur_loss
+        self.networth += self.cur_net_profit
 
         self.print_state()
 
@@ -76,22 +81,23 @@ class Experiment:
 
     # изменяет внутренее состояние после прибыли от продажи страховок
     def update_sell(self,sell_stats:Dict[str,Tuple[int,int]]):
+        # распаковка значений
         auto_sold_quantity,auto_profit = sell_stats["auto"]
+
         self.cur_auto_sold = auto_sold_quantity
         self.cur_profit += auto_profit
 
-        self.cur_net_profit += self.cur_profit
-        self.networth += self.cur_profit
-
+        return
     
     # изменяет внутренее состояние после убытков в виде налогов и страховых случаев
     def update_loss(self,loss:Tuple[int,int]) -> None: #! пока принимает int, потом будет принимать 
-        self.cur_loss = loss[1]
-        self.cur_net_profit -= loss[1]
+        #! тут должна быть распаковка значений объекта
 
+        self.cur_loss = loss[1]
         self.cur_auto_ins_cases = loss[0]
 
         return 
+    
         
     # обнуляет показатели связанные с продажей
     def reset_sell(self):
@@ -137,6 +143,7 @@ class Experiment:
 
         self.modeling_started = False
         self.modeling_finished = False   
+        self.is_bankrupt = False
 
         # reset страховой компании  
         self.ins_company.reset() 
@@ -164,7 +171,7 @@ class Experiment:
 
         return     
 
-
+    """ Обновление параметров моделирования """
     def update_auto_config(self,price,time,refund,demand):
 
         self.ins_company.auto_config_updated = True 
@@ -173,6 +180,11 @@ class Experiment:
         self.ins_company.auto_slider_refund = refund
         self.ins_company.auto_slider_base_demand = demand
         return 
+    
+    def update_insurance_prob(self,percent : int):
+        
+        self.ins_company.insurance_prob = percent/100
+        pass
     
 
     """ Методы вывода в консоль (временно для отладки)"""

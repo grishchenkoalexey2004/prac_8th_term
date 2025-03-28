@@ -37,7 +37,7 @@ class Interface:
         self.auto_slider_base_demand : tk.Variable = None
 
         # вероятность возникновения страхового случая
-        self.case_percent : tk.Variable = None 
+        self.insurance_prob : tk.Variable = None 
 
 
     # процедура запуска всей программы
@@ -64,7 +64,7 @@ class Interface:
         return
 
     def init_slider_vars(self) -> None:
-        self.case_percent = tk.Variable(value = 7)
+        self.insurance_prob = tk.Variable(value = 7)
 
         self.auto_slider_price = tk.Variable(value = 5)
         self.auto_slider_time : tk.Variable = tk.Variable(value = 5)
@@ -103,12 +103,12 @@ class Interface:
 
         # слайдер регулировки вероятности возникновения страховых случаев 
         
-        case_percent_label = ttk.Label(self.root, text = "Вероятность страхового случая",font=("Arial",12))
-        case_percent_label.grid(row=3, column=0, padx=10, pady=10)
+        insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая",font=("Arial",12))
+        insurance_prob_label.grid(row=3, column=0, padx=10, pady=10)
 
-        case_percent_slider = tk.Scale(self.root, from_ = 4,to = 20,orient="horizontal",resolution = 1,
-                                       variable = self.case_percent)
-        case_percent_slider.grid(row=3, column=1, padx=10, pady=10)
+        insurance_prob_slider = tk.Scale(self.root, from_ = 4,to = 25,orient="horizontal",resolution = 1,
+                                       variable = self.insurance_prob,command = self.update_insurance_prob)
+        insurance_prob_slider.grid(row=3, column=1, padx=10, pady=10)
 
         return 
     
@@ -128,8 +128,6 @@ class Interface:
 
         self.profit_entry = ttk.Entry()
         self.profit_entry.grid(row = 4,column = 4,padx = 0,pady = 0)
-
-
 
         params_label = ttk.Label(self.root,text="Убыток",font=("Arial",12))
         params_label.grid(row=5, column=4, padx=0, pady=0)
@@ -183,6 +181,10 @@ class Interface:
 
         self.experiment.update_auto_config(price,time,refund,demand)
     
+    def update_insurance_prob(self,event) -> None:
+        self.experiment.update_insurance_prob(percent = int(self.insurance_prob.get()))
+
+        return
 
     def reset_slider_vars(self) -> None:
         self.auto_slider_price.set(5)
@@ -190,7 +192,7 @@ class Interface:
         self.auto_slider_refund.set(50)
         self.auto_slider_base_demand.set(10)
 
-        self.case_percent.set(7)
+        self.insurance_prob.set(7)
 
         self.experiment.reset_modeling_params()
         return 
