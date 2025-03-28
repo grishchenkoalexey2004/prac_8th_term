@@ -105,7 +105,7 @@ class Experiment:
 
     def reset_loss(self) -> None:
 
-        self.loss = 0 
+        self.cur_loss = 0 
         self.tax_value = 0 
 
         self.cur_auto_ins_cases = 0
