@@ -36,7 +36,7 @@ class Experiment:
         self.cur_med_ins_cases : int = 0 
 
         # налог
-        self.tax_percent = 5
+        self.tax_percent = 10
         self.tax_value = 0
 
         self.ins_company : InsuranceComp = InsuranceComp() 
@@ -57,6 +57,12 @@ class Experiment:
         # подсчёт убытка
         loss_stats = self.ins_company.gen_ins_cases()
         self.update_loss(loss_stats)
+        
+        self.cur_net_profit = self.cur_profit - self.cur_loss
+        self.networth += self.cur_net_profit
+
+        # изменяет капитал, вычитая налог
+        self.apply_tax()
 
         # обновление чистой прибыли и капитала
         self.cur_net_profit = self.cur_profit - self.cur_loss
@@ -64,7 +70,7 @@ class Experiment:
 
         self.print_state()
 
-        # обновление дат
+        # обновление дат 
         self.ins_company.update_dates()
         self.curmonth += 1
 
@@ -98,6 +104,17 @@ class Experiment:
 
         return 
     
+    def apply_tax(self):
+
+        if self.networth<=0:
+            self.tax_value = 0
+
+        else:
+            self.tax_value = int(self.networth*(self.tax_percent/100))
+
+        self.networth -= self.tax_value
+
+        return
         
     # обнуляет показатели связанные с продажей
     def reset_sell(self):
@@ -130,6 +147,7 @@ class Experiment:
         self.ins_company.auto_slider_refund = 50
         self.auto_slider_base_demand = 10 
 
+        self.tax_percent = 10
         return 
 
 
@@ -186,6 +204,12 @@ class Experiment:
         self.ins_company.insurance_prob = percent/100
         pass
     
+    def update_tax(self,percent : int) -> None:
+        self.tax_percent = percent
+
+        return
+    
+
 
     """ Методы вывода в консоль (временно для отладки)"""
 
@@ -204,7 +228,8 @@ class Experiment:
         print(f"Прибыль: {self.cur_profit}")
         print(f"Убыток: {self.cur_loss}")
         print(f"Чистая прибыль: {self.cur_net_profit}")
-
+        print(f"Процент налога {self.tax_percent}")
+        print(f"Налог {self.tax_value}")
         return 
 
     def print_sliders(self) -> None:

@@ -26,6 +26,7 @@ class Interface:
         self.profit_entry : ttk.Entry = None
         self.loss_entry: ttk.Entry = None
         self.net_profit_entry : ttk.Entry = None 
+        self.tax_entry : ttk.Entry = None
         
 
         """ Переменные графического интерфейса """
@@ -38,6 +39,10 @@ class Interface:
 
         # вероятность возникновения страхового случая
         self.insurance_prob : tk.Variable = None 
+
+        # процент налога
+        self.tax_percent : tk.Variable = None
+
 
 
     # процедура запуска всей программы
@@ -71,6 +76,8 @@ class Interface:
         self.auto_slider_refund : tk.Variable = tk.Variable(value = 50)
         self.auto_slider_base_demand : tk.Variable = tk.Variable(value = 10)
 
+        self.insurance_prob = tk.Variable(value = 7)
+        self.tax_percent = tk.Variable(value = 10)
         return
 
 
@@ -110,6 +117,14 @@ class Interface:
                                        variable = self.insurance_prob,command = self.update_insurance_prob)
         insurance_prob_slider.grid(row=3, column=1, padx=10, pady=10)
 
+
+
+        tax_label = ttk.Label(self.root, text = "Налог (в процентах)",font=("Arial",12))
+        tax_label.grid(row=4, column=0, padx=10, pady=10)
+
+        tax_slider = tk.Scale(self.root, from_ = 4,to = 20,orient="horizontal",resolution = 1,
+                                       variable = self.tax_percent,command = self.update_tax)
+        tax_slider.grid(row=4, column=1, padx=10, pady=10)
         return 
     
 
@@ -146,11 +161,11 @@ class Interface:
     def init_buttons(self) -> None:
         # Кнопка Reset
         button = ttk.Button(self.root, text="ЗАНОВО", command=self.reset_button_click)
-        button.grid(row = 4, column = 2, columnspan = 1,pady = 10,padx = 10)
+        button.grid(row = 5, column = 2, columnspan = 1,pady = 10,padx = 10)
 
         # Кнопка старт/итерация
         button = ttk.Button(self.root, text="Старт/Итерация", command=self.iteration_button_click)
-        button.grid(row=4, column=0, columnspan=1, pady=10)
+        button.grid(row=5, column=0, columnspan=1, pady=10)
         return 
 
     def init_gui(self) -> None:
@@ -185,6 +200,11 @@ class Interface:
         self.experiment.update_insurance_prob(percent = int(self.insurance_prob.get()))
 
         return
+    
+    def update_tax(self,event) -> None:
+        self.experiment.update_tax(percent = int(self.tax_percent.get()))
+        
+        return 
 
     def reset_slider_vars(self) -> None:
         self.auto_slider_price.set(5)
@@ -193,6 +213,7 @@ class Interface:
         self.auto_slider_base_demand.set(10)
 
         self.insurance_prob.set(7)
+        self.tax_percent.set(10)
 
         self.experiment.reset_modeling_params()
         return 

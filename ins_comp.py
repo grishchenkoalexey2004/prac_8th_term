@@ -330,6 +330,5 @@ if __name__ == "__main__":
     positions = choice(days,size = res,p=probs)
 
 
-
     print(res)
     print(positions)
