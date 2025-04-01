@@ -46,7 +46,8 @@ class Experiment:
 
         return 
 
-    def simulate_month(self) -> None:
+    # возвращает True если моделирование закончено (по какой либо причине)  
+    def simulate_month(self) -> bool:
         self.reset_sell()
         self.reset_loss()
 
@@ -58,7 +59,6 @@ class Experiment:
         loss_stats = self.ins_company.gen_ins_cases()
         self.update_loss(loss_stats)
         
-         
         self.networth += self.cur_profit - self.cur_loss
 
         # изменяет капитал, вычитая налог
@@ -81,7 +81,8 @@ class Experiment:
             print("Компания обанкротилась")
             self.is_bankrupt = True
 
-        return 
+        # если какой либо из флагов установлен в True, то моделирование закончено
+        return self.is_bankrupt or self.modeling_finished
 
     # изменяет внутренее состояние после прибыли от продажи страховок
     def update_sell(self,sell_stats:Dict[str,Tuple[int,int]]):
@@ -162,14 +163,17 @@ class Experiment:
         return 
 
     """ Обработчики кнопок """
-    def iteration_button_click(self) -> None: 
+
+    # возвращает True если моделирование закончено (по какой либо причине)
+    def iteration_button_click(self) -> bool: 
 
 
         if not self.modeling_started:
             print("Моделирование запущено!")
             self.modeling_started = True
+ 
 
-        # проверяем остались ли еще итерации
+        # проверяем остались ли еще итерации и не обанкротилась ли компания
         if self.modeling_finished or self.is_bankrupt:
 
             if self.modeling_finished:
@@ -178,10 +182,20 @@ class Experiment:
             if self.is_bankrupt:
                 print("Компания обанкротилась!")
 
-        else:
-            self.simulate_month()
+            return True
 
-        return     
+        else:
+            simulation_finished = self.simulate_month()
+
+        return simulation_finished
+
+    def to_the_end(self) -> None:
+        
+        if not self.modeling_finished:
+            while not self.iteration_button_click():
+                pass 
+
+        return 
 
     """ Обновление параметров моделирования """
     def update_auto_config(self,price,time,refund,demand):

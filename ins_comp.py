@@ -249,9 +249,12 @@ class InsuranceComp:
     """ Процедуры обновления состояния страховой компании """
     
     def reset(self) -> None:
-        self.reset_programs()
-        self.reset_ins_prob()
+        # сброс параметров программ страхования
         self.reset_program_params()
+        # сброс базы программ страхования
+        self.reset_programs()
+        # сброс вероятности страховых случаев
+        self.reset_ins_prob()
         return 
     
     def reset_program_params(self) -> None:

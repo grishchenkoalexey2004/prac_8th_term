@@ -193,6 +193,10 @@ class Interface:
         exit_button.grid(row=5, column=2, columnspan=1, pady=10)
 
         # Кнопка "до конца"
+        to_the_end_button = ttk.Button(self.root, text="ДО КОНЦА", command=self.to_the_end_button_click)
+        to_the_end_button.grid(row=5, column=3, columnspan=1, pady=10)
+    
+
         return 
     
     def init_separators(self) -> None:
@@ -264,7 +268,7 @@ class Interface:
     def exit_button_click(self) -> None:
         
         sys.exit(0)
-        
+
         return 
 
     def reset_button_click(self) -> None:
@@ -281,6 +285,14 @@ class Interface:
 
         return 
     
+    def to_the_end_button_click(self) -> None:
+
+        self.experiment.to_the_end()
+
+        self.display_updated_finance()
+        return 
+    
+    
     def iteration_button_click(self) -> None: 
         self.experiment.iteration_button_click()
         self.display_updated_finance()
@@ -289,8 +301,7 @@ class Interface:
             self.iter_button_text.set("Сделать шаг")
         return 
     
-    """ Обновление числовых полей """
-
+    """ Обновление числовых полей после итерации """
     def display_updated_finance(self) -> None:
         self.refresh_networth_entry()
         self.refresh_profit_entry()
