@@ -145,29 +145,29 @@ class Interface:
         # networth_label = ttk.Label(self.root,textvariable = self.experiment.networth)
         # networth_label.grid(row = 1,column = 4,pady = 10,padx = 10)
         params_label = ttk.Label(self.root,text="Капитал в у.е.д.",font=("Arial",12))
-        params_label.grid(row=1, column=4, padx=0, pady=0)
+        params_label.grid(row=1, column=5, padx=0, pady=0)
 
         self.networth_entry = ttk.Entry()
-        self.networth_entry.grid(row=2,column =4,padx = 0,pady = 0)
+        self.networth_entry.grid(row=2,column =5,padx = 0,pady = 0)
 
 
         params_label = ttk.Label(self.root,text="Прибыль в у.е.д.",font=("Arial",12))
-        params_label.grid(row=3, column=4, padx=0, pady=0)
+        params_label.grid(row=3, column=5, padx=0, pady=0)
 
         self.profit_entry = ttk.Entry()
-        self.profit_entry.grid(row = 4,column = 4,padx = 0,pady = 0)
+        self.profit_entry.grid(row = 4,column = 5,padx = 0,pady = 0)
 
         params_label = ttk.Label(self.root,text="Убыток в у.е.д.",font=("Arial",12))
-        params_label.grid(row=5, column=4, padx=0, pady=0)
+        params_label.grid(row=5, column=5, padx=0, pady=0)
 
         self.loss_entry = ttk.Entry()
-        self.loss_entry.grid(row = 6,column = 4,padx = 0,pady = 0)
+        self.loss_entry.grid(row = 6,column = 5,padx = 0,pady = 0)
 
         params_label = ttk.Label(self.root,text="Чистая прибыль в у.е.д.",font=("Arial",12))
-        params_label.grid(row=7, column=4, padx=0, pady=0)
+        params_label.grid(row=7, column=5, padx=0, pady=0)
 
         self.net_profit_entry = ttk.Entry()
-        self.net_profit_entry.grid(row = 8,column = 4,padx = 0,pady = 0)
+        self.net_profit_entry.grid(row = 8,column = 5,padx = 0,pady = 0)
         
         return
 
@@ -180,12 +180,21 @@ class Interface:
         button = ttk.Button(self.root, textvariable=self.iter_button_text, command=self.iteration_button_click)
         button.grid(row=5, column=0, columnspan=1, pady=10)
         return 
+    
+    def init_separators(self) -> None:
+        vert_sep = ttk.Separator(self.root, orient="vertical")
+        vert_sep.grid(column=4, row=0, rowspan=7, sticky="ns",ipadx=0)
 
+        return 
+    
     def init_gui(self) -> None:
 
         # подпись Параметры
         params_label = ttk.Label(self.root,text="ПАРАМЕТРЫ",font=("Arial",20))
-        params_label.grid(row=0, column=0, padx=10, pady=10)
+        params_label.grid(row = 0, column=0, padx=10, pady=10)
+
+        results_label = ttk.Label(self.root,text = "РЕЗУЛЬТАТЫ",font = ("Arial",20))
+        results_label.grid(row = 0,column = 5,padx = 10,pady = 10)
 
         # Создание слайдеров настройки программ автострахования
         self.init_sliders() 
@@ -195,6 +204,8 @@ class Interface:
 
         # создание полей вывода численных показателей
         self.init_numeric_entries()
+
+        self.init_separators()
 
         return 
         
