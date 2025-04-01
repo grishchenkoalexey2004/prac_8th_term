@@ -29,10 +29,12 @@ class Interface:
         self.tax_entry : ttk.Entry = None
 
 
-        """ Размерные переменные интерфейса """
+        """ Константные переменные интерфейса """
         self.price_slider_len = 150
         self.time_slider_len = 150 
         self.refund_slider_len = 170
+
+        self.common_label_fond = ("Arial",12)
 
         """ Переменные графического интерфейса """
 
@@ -99,17 +101,20 @@ class Interface:
         auto_slider_label.grid(row=1, column=0, padx=10, pady=10)
 
         # сладер стоимости страховки
-        auto_slider_price = tk.Scale(self.root, from_=3, to=10, length = self.price_slider_len,orient="horizontal",label = "цена в у.е.д.",resolution =1,
+        auto_slider_price = tk.Scale(self.root, from_=3, to=10, length = self.price_slider_len,orient="horizontal",
+                                     label = "цена в у.е.д.",resolution =1,
                                      variable = self.auto_slider_price,command = self.update_auto_config)
         auto_slider_price.grid(row=1, column=1, padx=10, pady=10)
 
         # слайдер времени действия
-        auto_slider_time = tk.Scale(self.root, from_=3, to=12, length = self.time_slider_len, orient="horizontal",label = "время в мес.",resolution =1,
+        auto_slider_time = tk.Scale(self.root, from_=3, to=12, length = self.time_slider_len, orient="horizontal",
+                                    label = "время в мес.",resolution =1,
                                     variable = self.auto_slider_time,command = self.update_auto_config)
         auto_slider_time.grid(row=1, column=2, padx=10, pady=10)
 
         # слайдер возмещения
-        auto_slider_refund = tk.Scale(self.root, from_=10, to=100, length = self.refund_slider_len, orient="horizontal",label = "возврат в у.е.д.",resolution =1,
+        auto_slider_refund = tk.Scale(self.root, from_=10, to=100, length = self.refund_slider_len, orient="horizontal",
+                                      label = "возврат в у.е.д.",resolution =1,
                                       variable = self.auto_slider_refund,command = self.update_auto_config)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
@@ -129,8 +134,6 @@ class Interface:
         insurance_prob_slider = tk.Scale(self.root, from_ = 4,to = 25,orient="horizontal",resolution = 1,
                                        variable = self.insurance_prob,command = self.update_insurance_prob)
         insurance_prob_slider.grid(row=3, column=1, padx=10, pady=10)
-
-
 
         tax_label = ttk.Label(self.root, text = "Налог в процентах:",font=("Arial",12))
         tax_label.grid(row=4, column=0, padx=10, pady=10)
@@ -168,6 +171,13 @@ class Interface:
 
         self.net_profit_entry = ttk.Entry()
         self.net_profit_entry.grid(row = 8,column = 5,padx = 0,pady = 0)
+
+
+        tax_label = ttk.Label(self.root,text="Налог в у.е.д.",font=("Arial",12))
+        tax_label.grid(row=9, column=5, padx=0, pady=0)
+
+        self.tax_entry = ttk.Entry()
+        self.tax_entry.grid(row = 10,column = 5,padx = 0,pady = 0)
         
         return
 
@@ -276,6 +286,7 @@ class Interface:
         self.refresh_profit_entry()
         self.refresh_loss_entry()
         self.refresh_net_profit_entry()
+        self.refresh_tax_entry()
 
         return 
 
@@ -304,6 +315,10 @@ class Interface:
         self.net_profit_entry.insert(0,str(self.experiment.cur_net_profit))
 
         return 
+    
+    def refresh_tax_entry(self) -> None:
+        self.tax_entry.delete(0,50)
+        self.tax_entry.insert(0,str(self.experiment.tax_value))
 
 if __name__ == "__main__":
     pass 
