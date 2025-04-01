@@ -137,24 +137,13 @@ class Experiment:
     
     def reset_tax(self) -> None:
         self.tax_value = 0 
-        return 
-    
-
-    def reset_modeling_params(self) -> None:
-        self.auto_config_updated = False 
-        
-        
-        self.ins_company.auto_slider_price = 5 
-        self.ins_company.auto_slider_time = 5 
-        self.ins_company.auto_slider_refund = 50
-        self.auto_slider_base_demand = 10 
-
         self.tax_percent = 10
         return 
 
 
     def reset(self) -> None:
 
+        # сброс финансовых показателей
         self.networth = 100
         self.curmonth = 1 
 
@@ -166,9 +155,11 @@ class Experiment:
         self.modeling_finished = False   
         self.is_bankrupt = False
 
+
         # reset страховой компании  
         self.ins_company.reset() 
 
+        return 
 
     """ Обработчики кнопок """
     def iteration_button_click(self) -> None: 
@@ -209,10 +200,8 @@ class Experiment:
     
     def update_tax(self,percent : int) -> None:
         self.tax_percent = percent
-
         return
     
-
 
     """ Методы вывода в консоль (временно для отладки)"""
 
@@ -220,6 +209,7 @@ class Experiment:
         print("-----------------------------------------")
         self.print_finance() 
         self.print_quantity()
+        self.ins_company.print_slider_values()
         self.ins_company.print_programs()
         print("-----------------------------------------")
 

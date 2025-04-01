@@ -118,9 +118,6 @@ class InsuranceComp:
     """
 
     def __init__(self):
-
-        self.client_num: int = 0 
-
         
         # id созданной в последний раз программы страховки
         self.last_program_id = 0 
@@ -254,10 +251,21 @@ class InsuranceComp:
     def reset(self) -> None:
         self.reset_programs()
         self.reset_ins_prob()
-
+        self.reset_program_params()
         return 
     
-    
+    def reset_program_params(self) -> None:
+        self.auto_config_updated = False 
+        
+        
+        self.auto_slider_price = 5 
+        self.auto_slider_time = 5 
+        self.auto_slider_refund = 50
+        self.auto_slider_base_demand = 10 
+
+        return 
+
+
     def reset_programs(self) -> None: 
         self.last_program_id = 0 
         self.client_num = 0
@@ -319,7 +327,6 @@ class InsuranceComp:
     
 
     def print_programs(self):
-        print(f"Кол-во клиентов: {self.client_num}")
         for id in self.progs_active:
             print(self.ins_agreements[id])
 
