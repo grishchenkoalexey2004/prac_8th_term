@@ -187,8 +187,11 @@ class Interface:
         button.grid(row = 5, column = 2, columnspan = 1,pady = 10,padx = 10)
 
         # Кнопка старт/итерация
-        button = ttk.Button(self.root, textvariable=self.iter_button_text, command=self.iteration_button_click)
-        button.grid(row=5, column=0, columnspan=1, pady=10)
+        iter_button = ttk.Button(self.root, textvariable=self.iter_button_text, command=self.iteration_button_click)
+        iter_button.grid(row=5, column=0, columnspan=1, pady=10)
+
+
+        # Кнопка "до конца"
         return 
     
     def init_separators(self) -> None:
