@@ -133,7 +133,6 @@ class InsuranceComp:
 
 
         # делители коэф-тов для вычисления добавочного спроса (чем больше делитель тем менее эластичный спрос)
-
         self.auto_demand_delim = 10
         self.estate_demand_delim = 15 
         self.med_demand_delim = 5 
@@ -148,12 +147,19 @@ class InsuranceComp:
         # вероятность возникновения страхвого случая
         self.insurance_prob: float = 0.05 # будет настраиваемым параметром
 
+        # базовый спрос на все виды страховок
+        self.base_demand : int = 10
 
         # условия автостраховки (c заданными начальными значениями)
         self.auto_slider_price : int =  5
         self.auto_slider_time : int = 5
         self.auto_slider_refund : int = 50 
-        self.auto_slider_base_demand : int = 10
+
+        # условия медстраховки (c заданными начальными значениями)
+        self.med_slider_price : int = 2
+        self.med_slider_time : int = 5
+        self.med_slider_refund : int = 20 
+
 
 
     """ Инициализация """
@@ -264,7 +270,10 @@ class InsuranceComp:
         self.auto_slider_price = 5 
         self.auto_slider_time = 5 
         self.auto_slider_refund = 50
-        self.auto_slider_base_demand = 10 
+
+        self.med_slider_price = 2 
+        self.med_slider_time = 5 
+        self.med_slider_refund = 20  
 
         return 
 
@@ -306,7 +315,7 @@ class InsuranceComp:
         auto_profit_coef = (self.auto_slider_refund*self.auto_slider_time)/self.auto_slider_price
         auto_add_demand = int(auto_profit_coef//self.auto_demand_delim)
         
-        auto_demand = self.calc_demand(self.auto_slider_base_demand,auto_add_demand)
+        auto_demand = self.calc_demand(self.base_demand,auto_add_demand)
         auto_profit = auto_demand*self.auto_slider_price
 
 
@@ -324,7 +333,7 @@ class InsuranceComp:
         print(f"Auto price: {self.auto_slider_price}")
         print(f"Auto time: {self.auto_slider_time}")
         print(f"Auto refund: {self.auto_slider_refund}")
-        print(f"Auto demand: {self.auto_slider_base_demand}")
+        print(f"Demand: {self.base_demand}")
 
         return 
     

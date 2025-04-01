@@ -37,15 +37,26 @@ class Interface:
         self.large_label_font = ("Arial",20)
 
         """ Переменные графического интерфейса """
+        # время моделирования   
+        self.modeling_duration : tk.Variable = None
+
         # Текущие значения слайдеров автостраховки (нельзя определять до построения интерфейса, поэтому None)
         self.auto_slider_price : tk.Variable = None
         self.auto_slider_time : tk.Variable = None
         self.auto_slider_refund : tk.Variable = None
-        self.auto_slider_base_demand : tk.Variable = None
-        self.modeling_duration : tk.Variable = None
+
+        # параметры медстраховки
+        self.med_slider_price : tk.Variable = None
+        self.med_slider_time : tk.Variable = None
+        self.med_slider_refund : tk.Variable = None
+        
 
         # вероятность возникновения страхового случая
         self.insurance_prob : tk.Variable = None 
+
+
+        # базовый спрос на все виды страховок
+        self.base_demand : tk.Variable = None
 
         # текст кнопки СТАРТ/итерация (может меняться в зависимости от состояния моделирования)
         self.iter_button_text : tk.StringVar = None
@@ -81,20 +92,23 @@ class Interface:
         return
 
     def init_interface_vars(self) -> None:
-        self.insurance_prob = tk.Variable(value = 7)
+        
         
         # установка начальных значений слайдеров
         self.auto_slider_price = tk.Variable(value = 5)
         self.auto_slider_time : tk.Variable = tk.Variable(value = 5)
         self.auto_slider_refund : tk.Variable = tk.Variable(value = 50)
-        self.auto_slider_base_demand : tk.Variable = tk.Variable(value = 10)
 
+        self.med_slider_price : tk.Variable = tk.Variable(value = 2)
+        self.med_slider_time : tk.Variable = tk.Variable(value = 5)
+        self.med_slider_refund : tk.Variable = tk.Variable(value = 20)
 
-
-        # установка прочих параметров моделирования
+        # установка начальных значений прочих параметров моделирования
         self.insurance_prob = tk.Variable(value = 7)
         self.tax_percent = tk.Variable(value = 10)
         self.modeling_duration = tk.Variable(value = 12)
+        self.base_demand : tk.Variable = tk.Variable(value = 10)
+
 
         # установка текста кнопки СТАРТ
         self.iter_button_text = tk.StringVar(value="СТАРТ")
@@ -103,10 +117,54 @@ class Interface:
 
 
     def init_sliders(self) -> None: 
-        auto_slider_label = ttk.Label(self.root, text="АВТО:",font=("Arial",16))
+        # устанавливаем слайдеры автостраховки 
+        self.init_auto_sliders()
+
+        # устанавливаем слайдеры медстраховки
+        self.init_med_sliders()
+
+
+        # базовый спрос на все виды страховок
+        demand_slider = tk.Scale(self.root, from_=2, to=20, orient="horizontal",resolution =1,command = self.update_base_demand,
+                                      variable = self.base_demand)
+        demand_slider.grid(row=2, column=1, padx=10, pady=10)
+
+
+        # вероятность страхового случая
+        insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая в процентах:", font=self.common_label_font)
+        insurance_prob_label.grid(row=3, column=0, padx=10, pady=10)
+
+        # слайдер регулировки вероятности возникновения страховых случаев 
+        insurance_prob_slider = tk.Scale(self.root, from_ = 4,to = 25,orient="horizontal",resolution = 1,
+                                       variable = self.insurance_prob,command = self.update_insurance_prob)
+        insurance_prob_slider.grid(row=3, column=1, padx=10, pady=10)
+
+        # налог
+        tax_label = ttk.Label(self.root, text = "Налог в процентах:", font=self.common_label_font)
+        tax_label.grid(row=4, column=0, padx=10, pady=10)
+
+        # слайдер регулировки налога
+        tax_slider = tk.Scale(self.root, from_ = 4,to = 20,orient="horizontal",resolution = 1,
+                                       variable = self.tax_percent,command = self.update_tax)
+        tax_slider.grid(row=4, column=1, padx=10, pady=10)
+
+
+        modeling_label = ttk.Label(self.root, text = "Срок  моделирования:", font=self.common_label_font)
+        modeling_label.grid(row=5, column=0, padx=10, pady=10)
+
+        # слайдер регулировки срока моделирования
+        modeling_slider = tk.Scale(self.root, from_ = 8,to = 24,orient="horizontal",resolution = 1,
+                                    variable = self.modeling_duration,command = self.update_modeling_duration)
+        modeling_slider.grid(row=5, column=1, padx=10, pady=10)
+
+        return 
+    
+    def init_auto_sliders(self) -> None:
+        # надпись "АВТОСТРАХОВКА:"
+        auto_slider_label = ttk.Label(self.root, text="АВТОСТРАХОВКА:",font=("Arial",16))
         auto_slider_label.grid(row=1, column=0, padx=10, pady=10)
 
-        # сладер стоимости страховки
+        # сладер стоимости автостраховки
         auto_slider_price = tk.Scale(self.root, from_=3, to=10, length = self.price_slider_len,orient="horizontal",
                                      label = "цена в у.е.д.",resolution =1,
                                      variable = self.auto_slider_price,command = self.update_auto_config)
@@ -124,38 +182,35 @@ class Interface:
                                       variable = self.auto_slider_refund,command = self.update_auto_config)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
-        # слайдер базового спроса автостраховки
-        auto_slider_label = ttk.Label(self.root, text="Базовый спрос в единицах:", font=self.common_label_font)
-        auto_slider_label.grid(row=2, column=0, padx=10, pady=10)
-
-        auto_slider_demand = tk.Scale(self.root, from_=2, to=20, orient="horizontal",resolution =1,
-                                      variable = self.auto_slider_base_demand)
-        auto_slider_demand.grid(row=2, column=1, padx=10, pady=10)
-
-        # слайдер регулировки вероятности возникновения страховых случаев 
         
-        insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая в процентах:", font=self.common_label_font)
-        insurance_prob_label.grid(row=3, column=0, padx=10, pady=10)
 
-        insurance_prob_slider = tk.Scale(self.root, from_ = 4,to = 25,orient="horizontal",resolution = 1,
-                                       variable = self.insurance_prob,command = self.update_insurance_prob)
-        insurance_prob_slider.grid(row=3, column=1, padx=10, pady=10)
-
-        tax_label = ttk.Label(self.root, text = "Налог в процентах:", font=self.common_label_font)
-        tax_label.grid(row=4, column=0, padx=10, pady=10)
-
-        tax_slider = tk.Scale(self.root, from_ = 4,to = 20,orient="horizontal",resolution = 1,
-                                       variable = self.tax_percent,command = self.update_tax)
-        tax_slider.grid(row=4, column=1, padx=10, pady=10)
-
-        modeling_label = ttk.Label(self.root, text = "Срок  моделирования:", font=self.common_label_font)
-        modeling_label.grid(row=5, column=0, padx=10, pady=10)
-
-        # слайдер регулировки срока моделирования
-        modeling_slider = tk.Scale(self.root, from_ = 8,to = 24,orient="horizontal",resolution = 1,
-                                    variable = self.modeling_duration,command = self.update_modeling_duration)
-        modeling_slider.grid(row=5, column=1, padx=10, pady=10)
         return 
+
+
+    def init_med_sliders(self) -> None:
+        # надпись "МЕД"
+        med_slider_label = ttk.Label(self.root, text="МЕДИЦИНА:", font=("Arial", 16))
+        med_slider_label.grid(row=6, column=0, padx=10, pady=10)
+
+        # слайдер стоимости страховки
+        med_slider_price = tk.Scale(self.root, from_=3, to=10, length=self.price_slider_len, orient="horizontal",
+                                  label="цена в у.е.д.", resolution=1,
+                                  variable=self.med_slider_price, command=self.update_med_config)
+        med_slider_price.grid(row=6, column=1, padx=10, pady=10)
+
+        # слайдер времени действия
+        med_slider_time = tk.Scale(self.root, from_=3, to=12, length=self.time_slider_len, orient="horizontal",
+                                 label="время в мес.", resolution=1,
+                                 variable=self.med_slider_time, command=self.update_med_config)
+        med_slider_time.grid(row=6, column=2, padx=10, pady=10)
+
+        # слайдер возмещения
+        med_slider_refund = tk.Scale(self.root, from_=10, to=100, length=self.refund_slider_len, orient="horizontal",
+                                   label="возврат в у.е.д.", resolution=1,
+                                   variable=self.med_slider_refund, command=self.update_med_config)
+        med_slider_refund.grid(row=6, column=3, padx=10, pady=10)
+
+        return
     
 
     def init_numeric_entries(self) -> None:
@@ -203,19 +258,19 @@ class Interface:
     def init_buttons(self) -> None:
         # Кнопка Reset
         button = ttk.Button(self.root, text="ЗАНОВО", command=self.reset_button_click)
-        button.grid(row = 6, column = 1, columnspan = 1,pady = 10,padx = 10)
+        button.grid(row = 8, column = 1, columnspan = 1,pady = 10,padx = 10)
 
         # Кнопка старт/итерация
         iter_button = ttk.Button(self.root, textvariable=self.iter_button_text, command=self.iteration_button_click)
-        iter_button.grid(row=6, column=0, columnspan=1, pady=10)
+        iter_button.grid(row=8, column=0, columnspan=1, pady=10)
 
         # Кнопка Выход
         exit_button = ttk.Button(self.root, text="ВЫХОД", command=self.exit_button_click)
-        exit_button.grid(row=6, column=2, columnspan=1, pady=10)
+        exit_button.grid(row=8, column=2, columnspan=1, pady=10)
 
         # Кнопка "до конца"
         to_the_end_button = ttk.Button(self.root, textvariable=self.to_the_end_button_text, command=self.to_the_end_button_click)
-        to_the_end_button.grid(row=6, column=3, columnspan=1, pady=10)
+        to_the_end_button.grid(row=8, column=3, columnspan=1, pady=10)
 
         return 
     
@@ -264,10 +319,25 @@ class Interface:
         price = int(self.auto_slider_price.get())
         time = int(self.auto_slider_time.get())
         refund = int(self.auto_slider_refund.get())
-        demand = int(self.auto_slider_base_demand.get())
 
-        self.experiment.update_auto_config(price,time,refund,demand)
+        self.experiment.update_auto_config(price,time,refund)
+        return 
     
+    def update_med_config(self,event):
+        price = int(self.med_slider_price.get())
+        time = int(self.med_slider_time.get())
+        refund = int(self.med_slider_refund.get())
+    
+        self.experiment.update_med_config(price,time,refund)
+
+        return 
+
+    def update_base_demand(self,event):
+        demand = int(self.base_demand.get())
+        self.experiment.update_base_demand(demand)
+
+        return 
+        
     def update_insurance_prob(self,event) -> None:
         self.experiment.update_insurance_prob(percent = int(self.insurance_prob.get()))
 
@@ -283,22 +353,6 @@ class Interface:
 
         return 
 
-    def reset_interface_vars(self) -> None:
-        # слайдеры страховок
-        self.auto_slider_price.set(5)
-        self.auto_slider_time.set(5)
-        self.auto_slider_refund.set(50)
-        self.auto_slider_base_demand.set(10)
-
-        # сладеры других параметров
-        self.insurance_prob.set(7)
-        self.tax_percent.set(10)
-        self.modeling_duration.set(12)
-        # кнопки
-
-        self.iter_button_text.set("СТАРТ")
-        self.to_the_end_button_text.set("ДО КОНЦА")
-        return 
     
     def exit_button_click(self) -> None:
         
@@ -310,13 +364,16 @@ class Interface:
         print("Reset")
 
         # возврат слайдеров к дефолтным значениями
-        self.reset_interface_vars()
+        self.init_interface_vars()
 
         # обновление финансовых показателей и состояния страховой компании (удаление всех договоров и тд)
         self.experiment.reset()
 
         # обновление значений окошек с финансовыми показателями (устанавливается начальное состояние)
         self.display_updated_finance()
+
+        # обновление текста кнопок
+        self.update_button_texts()
 
         return 
     
@@ -345,7 +402,7 @@ class Interface:
 
         elif self.experiment.modeling_finished:
             self.iter_button_text.set("УСПЕХ")
-            
+
         else:
             self.iter_button_text.set("Сделать шаг")
 

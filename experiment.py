@@ -151,7 +151,7 @@ class Experiment:
         self.networth = 100
         self.curmonth = 1 
         self.modeling_duration = 12
-        
+
         self.reset_sell() 
         self.reset_loss() 
         self.reset_tax()
@@ -202,13 +202,23 @@ class Experiment:
         return 
 
     """ Обновление параметров моделирования """
-    def update_auto_config(self,price,time,refund,demand):
+    def update_auto_config(self,price,time,refund):
 
         self.ins_company.auto_config_updated = True 
         self.ins_company.auto_slider_price = price
         self.ins_company.auto_slider_time = time
         self.ins_company.auto_slider_refund = refund
-        self.ins_company.auto_slider_base_demand = demand
+        return 
+    
+    def update_med_config(self,price,time,refund):
+        self.ins_company.med_config_updated = True 
+        self.ins_company.med_slider_price = price
+        self.ins_company.med_slider_time = time
+        self.ins_company.med_slider_refund = refund
+        return 
+    
+    def update_base_demand(self,demand):
+        self.ins_company.base_demand = demand
         return 
     
     def update_insurance_prob(self,percent : int):
