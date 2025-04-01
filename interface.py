@@ -123,8 +123,11 @@ class Interface:
         # устанавливаем слайдеры медстраховки
         self.init_med_sliders()
 
-
         # базовый спрос на все виды страховок
+        demand_label = ttk.Label(self.root, text = "Базовый спрос на все виды страховок:", font=self.common_label_font)
+        demand_label.grid(row=2, column=0, padx=10, pady=10)
+
+        # слайдер базового спроса на все виды страховок
         demand_slider = tk.Scale(self.root, from_=2, to=20, orient="horizontal",resolution =1,command = self.update_base_demand,
                                       variable = self.base_demand)
         demand_slider.grid(row=2, column=1, padx=10, pady=10)
