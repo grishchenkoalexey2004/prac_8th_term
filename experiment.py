@@ -17,6 +17,9 @@ class Experiment:
         self.modeling_finished : bool = False
         self.is_bankrupt : bool = False 
 
+        # срок моделирования
+        self.modeling_duration : int = 12
+
         # номер текущего месяца
         self.curmonth : int = 1
 
@@ -73,7 +76,7 @@ class Experiment:
         self.curmonth += 1
 
         # временно поставил 10 - конец симуляции по времени
-        if self.curmonth>10:
+        if self.curmonth>self.modeling_duration:
             print("Симуляция завершена")
             self.modeling_finished = True 
 
@@ -147,7 +150,8 @@ class Experiment:
         # сброс финансовых показателей
         self.networth = 100
         self.curmonth = 1 
-
+        self.modeling_duration = 12
+        
         self.reset_sell() 
         self.reset_loss() 
         self.reset_tax()

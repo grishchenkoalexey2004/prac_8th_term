@@ -33,7 +33,7 @@ class Interface:
         self.time_slider_len = 150 
         self.refund_slider_len = 170
 
-        self.common_label_fond = ("Arial",12)
+        self.common_label_font = ("Arial",12)
         self.large_label_font = ("Arial",20)
 
         """ Переменные графического интерфейса """
@@ -42,6 +42,7 @@ class Interface:
         self.auto_slider_time : tk.Variable = None
         self.auto_slider_refund : tk.Variable = None
         self.auto_slider_base_demand : tk.Variable = None
+        self.modeling_duration : tk.Variable = None
 
         # вероятность возникновения страхового случая
         self.insurance_prob : tk.Variable = None 
@@ -85,9 +86,12 @@ class Interface:
         self.auto_slider_refund : tk.Variable = tk.Variable(value = 50)
         self.auto_slider_base_demand : tk.Variable = tk.Variable(value = 10)
 
+
+
         # установка прочих параметров моделирования
         self.insurance_prob = tk.Variable(value = 7)
         self.tax_percent = tk.Variable(value = 10)
+        self.modeling_duration = tk.Variable(value = 12)
 
         # установка текста кнопки старт
         self.iter_button_text = tk.StringVar(value="Старт")
@@ -118,7 +122,7 @@ class Interface:
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
         # слайдер базового спроса автостраховки
-        auto_slider_label = ttk.Label(self.root, text="Базовый спрос в единицах:",font=("Arial",12))
+        auto_slider_label = ttk.Label(self.root, text="Базовый спрос в единицах:", font=self.common_label_font)
         auto_slider_label.grid(row=2, column=0, padx=10, pady=10)
 
         auto_slider_demand = tk.Scale(self.root, from_=2, to=20, orient="horizontal",resolution =1,
@@ -127,19 +131,27 @@ class Interface:
 
         # слайдер регулировки вероятности возникновения страховых случаев 
         
-        insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая в процентах:",font=("Arial",12))
+        insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая в процентах:", font=self.common_label_font)
         insurance_prob_label.grid(row=3, column=0, padx=10, pady=10)
 
         insurance_prob_slider = tk.Scale(self.root, from_ = 4,to = 25,orient="horizontal",resolution = 1,
                                        variable = self.insurance_prob,command = self.update_insurance_prob)
         insurance_prob_slider.grid(row=3, column=1, padx=10, pady=10)
 
-        tax_label = ttk.Label(self.root, text = "Налог в процентах:",font=("Arial",12))
+        tax_label = ttk.Label(self.root, text = "Налог в процентах:", font=self.common_label_font)
         tax_label.grid(row=4, column=0, padx=10, pady=10)
 
         tax_slider = tk.Scale(self.root, from_ = 4,to = 20,orient="horizontal",resolution = 1,
                                        variable = self.tax_percent,command = self.update_tax)
         tax_slider.grid(row=4, column=1, padx=10, pady=10)
+
+        modeling_label = ttk.Label(self.root, text = "Срок  моделирования:", font=self.common_label_font)
+        modeling_label.grid(row=5, column=0, padx=10, pady=10)
+
+        # слайдер регулировки срока моделирования
+        modeling_slider = tk.Scale(self.root, from_ = 8,to = 24,orient="horizontal",resolution = 1,
+                                    variable = self.modeling_duration,command = self.update_modeling_duration)
+        modeling_slider.grid(row=5, column=1, padx=10, pady=10)
         return 
     
 
@@ -151,7 +163,6 @@ class Interface:
 
         self.networth_entry = ttk.Entry()
         self.networth_entry.grid(row=2,column =5,padx = 0,pady = 0)
-
 
         params_label = ttk.Label(self.root,text="Прибыль в у.е.д.",font=("Arial",12))
         params_label.grid(row=3, column=5, padx=0, pady=0)
@@ -171,15 +182,15 @@ class Interface:
         self.net_profit_entry = ttk.Entry()
         self.net_profit_entry.grid(row = 8,column = 5,padx = 0,pady = 0)
 
-
         tax_label = ttk.Label(self.root,text="Налог в у.е.д.",font=("Arial",12))
         tax_label.grid(row=9, column=5, padx=0, pady=0)
 
         self.tax_entry = ttk.Entry()
         self.tax_entry.grid(row = 10,column = 5,padx = 0,pady = 0)
         
+        
         # Текущий месяц (в верху окошка)
-        curmonth_label = ttk.Label(self.root,text = "Текущий месяц:",font = self.common_label_fond)
+        curmonth_label = ttk.Label(self.root,text = "Текущий месяц:",font = self.common_label_font)
         curmonth_label.grid(row = 0,column = 1,padx = 10,pady = 10)
 
         self.curmonth_entry = ttk.Entry()
@@ -189,19 +200,19 @@ class Interface:
     def init_buttons(self) -> None:
         # Кнопка Reset
         button = ttk.Button(self.root, text="ЗАНОВО", command=self.reset_button_click)
-        button.grid(row = 5, column = 1, columnspan = 1,pady = 10,padx = 10)
+        button.grid(row = 6, column = 1, columnspan = 1,pady = 10,padx = 10)
 
         # Кнопка старт/итерация
         iter_button = ttk.Button(self.root, textvariable=self.iter_button_text, command=self.iteration_button_click)
-        iter_button.grid(row=5, column=0, columnspan=1, pady=10)
+        iter_button.grid(row=6, column=0, columnspan=1, pady=10)
 
         # Кнопка Выход
         exit_button = ttk.Button(self.root, text="ВЫХОД", command=self.exit_button_click)
-        exit_button.grid(row=5, column=2, columnspan=1, pady=10)
+        exit_button.grid(row=6, column=2, columnspan=1, pady=10)
 
         # Кнопка "до конца"
         to_the_end_button = ttk.Button(self.root, text="ДО КОНЦА", command=self.to_the_end_button_click)
-        to_the_end_button.grid(row=5, column=3, columnspan=1, pady=10)
+        to_the_end_button.grid(row=6, column=3, columnspan=1, pady=10)
 
         return 
     
@@ -243,6 +254,7 @@ class Interface:
 
         return 
         
+    
  
     """ Обработчики кнопок """
 
@@ -261,7 +273,12 @@ class Interface:
     
     def update_tax(self,event) -> None:
         self.experiment.update_tax(percent = int(self.tax_percent.get()))
-        
+
+        return 
+    
+    def update_modeling_duration(self,event) -> None:
+        self.experiment.modeling_duration = int(self.modeling_duration.get())
+
         return 
 
     def reset_interface_vars(self) -> None:
@@ -274,7 +291,7 @@ class Interface:
         # сладеры других параметров
         self.insurance_prob.set(7)
         self.tax_percent.set(10)
-
+        self.modeling_duration.set(12)
         # кнопки
 
         self.iter_button_text.set("Старт")
