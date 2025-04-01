@@ -26,10 +26,12 @@ class InsuranceAgreement:
         которую они подписали.
     """
 
-    def __init__(self,prog_id: int, prog_type: str, prog_price: int, prog_time: int, prog_refund: int):
+    def __init__(self,prog_id: int, ins_type: str, prog_price: int, prog_time: int, prog_refund: int):
         # параметры страховой программы
         self.prog_id: int = prog_id
-        self.prog_type: str = prog_type
+        # тип страховой программы (auto,med,estate)
+        self.ins_type: str = ins_type
+        # параметры страховой программы
         self.prog_price: int = prog_price
         self.prog_time: int = prog_time
         self.prog_refund: int = prog_refund
@@ -107,9 +109,8 @@ class InsuranceAgreement:
 
         return deleted_count  
 
-    
     def __repr__(self):
-        return f"Prog_id: {self.prog_id}, prog_type: {self.prog_type}, clients: {self.client_list},ins_cases: {self.insurance_cases} "
+        return f"Prog_id: {self.prog_id}, prog_type: {self.ins_type}, clients: {self.client_list},ins_cases: {self.insurance_cases} "
     
 
 class InsuranceComp:
@@ -209,6 +210,8 @@ class InsuranceComp:
             new_agr = self.create_ins_agr("med",self.cur_medprog_id)
             self.add_ins_agr(self.cur_medprog_id,new_agr)
 
+            self.med_config_updated = False
+
         # добавляем клиентов в действующий страховой договор
         self.ins_agreements[self.cur_autoprog_id].add_clients(auto_demand,insurance_prob=self.insurance_prob)
         self.ins_agreements[self.cur_medprog_id].add_clients(med_demand,insurance_prob=self.insurance_prob)
@@ -231,19 +234,19 @@ class InsuranceComp:
         return 
     
     # создание объекта страхового договора определённого типа по заданным условиям
-    def create_ins_agr(self,prog_type:str,prog_id: int)-> InsuranceAgreement:
-        if prog_type == "auto":
+    def create_ins_agr(self,ins_type:str,prog_id: int)-> InsuranceAgreement:
+        if ins_type == "auto":
             prog_price = self.auto_slider_price
             prog_refund = self.auto_slider_refund
             prog_time = self.auto_slider_time
 
-        elif prog_type == "med":
+        elif ins_type == "med":
             prog_price = self.med_slider_price
             prog_refund = self.med_slider_refund
             prog_time = self.med_slider_time 
 
         # пока что привязаны к слайдерам от автостраховки
-        elif prog_type == "estate":
+        elif ins_type == "estate":
             prog_price = self.auto_slider_price
             prog_refund = self.auto_slider_refund
             prog_time = self.auto_slider_time
@@ -252,7 +255,7 @@ class InsuranceComp:
             raise ValueError
         
         
-        return InsuranceAgreement(prog_id,prog_type,prog_price,prog_time,prog_refund)
+        return InsuranceAgreement(prog_id,ins_type,prog_price,prog_time,prog_refund)
     
     # добавляет в "базу" новый страховой договор
     def add_ins_agr(self,prog_id:int,agr_obj:InsuranceAgreement) -> None: 
@@ -301,17 +304,19 @@ class InsuranceComp:
         self.insurance_prob = 0.07
 
     # возвращает кол-во и сумму страховых возвратов по категориям страховок
-    def gen_ins_cases(self) -> Tuple[int,int]: #! пока возвр. int, потом будет Dict[str,Tuple(int,int)]
+    def gen_ins_cases(self) -> Dict[str,List[int]]:
         
-        total_cases = 0 
-        total_refund_sum = 0 
+        ins_case_stat = {"auto" : [0,0],"med" : [0,0],"estate" : [0,0]}
+
 
         for id in self.progs_active:
             ins_cases,refund_sum = self.ins_agreements[id].gen_ins_cases()
-            total_cases += ins_cases
-            total_refund_sum += refund_sum 
+            ins_type = self.ins_agreements[id].ins_type
 
-        return (total_cases,total_refund_sum)
+            ins_case_stat[ins_type][0] += ins_cases
+            ins_case_stat[ins_type][1] += refund_sum
+
+        return ins_case_stat
 
 
     """ Генерация спроса, подсчёт прибыли """
@@ -357,7 +362,7 @@ class InsuranceComp:
         print(f"Demand: {self.base_demand}")
         return 
     
-    
+
     def print_programs(self):
         for id in self.progs_active:
             print(self.ins_agreements[id])

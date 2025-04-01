@@ -101,11 +101,14 @@ class Experiment:
         return
     
     # изменяет внутренее состояние после убытков в виде налогов и страховых случаев
-    def update_loss(self,loss:Tuple[int,int]) -> None: #! пока принимает int, потом будет принимать 
+    def update_loss(self,loss:Dict[str,List[int]]) -> None: #! пока принимает int, потом будет принимать 
         #! тут должна быть распаковка значений объекта
 
-        self.cur_loss = loss[1]
-        self.cur_auto_ins_cases = loss[0]
+        self.cur_loss = loss["auto"][1] + loss["med"][1] + loss["estate"][1]
+        
+        self.cur_auto_ins_cases = loss["auto"][0]
+        self.cur_med_ins_cases = loss["med"][0]
+        self.cur_estate_ins_cases = loss["estate"][0]
 
         return 
     

@@ -491,7 +491,7 @@ class Interface:
 
     def refresh_curmonth_entry(self) -> None:
         self.curmonth_entry.delete(0,50)
-        self.curmonth_entry.insert(0,str(self.experiment.curmonth))
+        self.curmonth_entry.insert(0,str(self.experiment.curmonth-1))
 
         return 
 
