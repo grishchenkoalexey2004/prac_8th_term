@@ -37,8 +37,6 @@ class Interface:
         self.large_label_font = ("Arial",20)
 
         """ Переменные графического интерфейса """
-        # время моделирования   
-        self.modeling_duration : tk.Variable = None
 
         # Текущие значения слайдеров автостраховки (нельзя определять до построения интерфейса, поэтому None)
         self.auto_slider_price : tk.Variable = None
@@ -50,6 +48,11 @@ class Interface:
         self.med_slider_time : tk.Variable = None
         self.med_slider_refund : tk.Variable = None
         
+
+        # прочие параметры моделирования
+
+        # время моделирования   
+        self.modeling_duration : tk.Variable = None
 
         # вероятность возникновения страхового случая
         self.insurance_prob : tk.Variable = None 
@@ -74,11 +77,13 @@ class Interface:
         # создание корня интерфейса
         self.init_root() 
 
+        # установка начальных значений переменных интерфейса
         self.init_interface_vars()
 
         # запускаем конструктор интерфейса 
         self.init_gui()
 
+        # инициализация внутреннего состояния эксперимента
         self.experiment.init_state()
 
         # Запускаем главный цикл обработки событий
@@ -96,23 +101,21 @@ class Interface:
         
         # установка начальных значений слайдеров
         self.auto_slider_price = tk.Variable(value = 5)
-        self.auto_slider_time : tk.Variable = tk.Variable(value = 5)
-        self.auto_slider_refund : tk.Variable = tk.Variable(value = 50)
+        self.auto_slider_time = tk.Variable(value = 5)
+        self.auto_slider_refund = tk.Variable(value = 50)
 
-        self.med_slider_price : tk.Variable = tk.Variable(value = 2)
-        self.med_slider_time : tk.Variable = tk.Variable(value = 5)
-        self.med_slider_refund : tk.Variable = tk.Variable(value = 20)
+        self.med_slider_price = tk.Variable(value = 2)
+        self.med_slider_time = tk.Variable(value = 5)
+        self.med_slider_refund = tk.Variable(value = 10)
 
         # установка начальных значений прочих параметров моделирования
         self.insurance_prob = tk.Variable(value = 7)
         self.tax_percent = tk.Variable(value = 10)
         self.modeling_duration = tk.Variable(value = 12)
-        self.base_demand : tk.Variable = tk.Variable(value = 10)
+        self.base_demand = tk.Variable(value = 10)
 
+        self.init_button_vars()
 
-        # установка текста кнопки СТАРТ
-        self.iter_button_text = tk.StringVar(value="СТАРТ")
-        self.to_the_end_button_text = tk.StringVar(value="ДО КОНЦА")
         return
 
 
@@ -157,7 +160,7 @@ class Interface:
 
         # слайдер регулировки срока моделирования
         modeling_slider = tk.Scale(self.root, from_ = 8,to = 24,orient="horizontal",resolution = 1,
-                                    variable = self.modeling_duration,command = self.update_modeling_duration)
+                                    variable = self.modeling_duration, command = self.update_modeling_duration)
         modeling_slider.grid(row=5, column=1, padx=10, pady=10)
 
         return 
@@ -196,19 +199,19 @@ class Interface:
         med_slider_label.grid(row=6, column=0, padx=10, pady=10)
 
         # слайдер стоимости страховки
-        med_slider_price = tk.Scale(self.root, from_=3, to=10, length=self.price_slider_len, orient="horizontal",
+        med_slider_price = tk.Scale(self.root, from_=1, to=4, length=self.price_slider_len, orient="horizontal",
                                   label="цена в у.е.д.", resolution=1,
                                   variable=self.med_slider_price, command=self.update_med_config)
         med_slider_price.grid(row=6, column=1, padx=10, pady=10)
 
         # слайдер времени действия
-        med_slider_time = tk.Scale(self.root, from_=3, to=12, length=self.time_slider_len, orient="horizontal",
+        med_slider_time = tk.Scale(self.root, from_=1, to=12, length=self.time_slider_len, orient="horizontal",
                                  label="время в мес.", resolution=1,
                                  variable=self.med_slider_time, command=self.update_med_config)
         med_slider_time.grid(row=6, column=2, padx=10, pady=10)
 
         # слайдер возмещения
-        med_slider_refund = tk.Scale(self.root, from_=10, to=100, length=self.refund_slider_len, orient="horizontal",
+        med_slider_refund = tk.Scale(self.root, from_=5, to=15, length=self.refund_slider_len, orient="horizontal",
                                    label="возврат в у.е.д.", resolution=1,
                                    variable=self.med_slider_refund, command=self.update_med_config)
         med_slider_refund.grid(row=6, column=3, padx=10, pady=10)
@@ -274,6 +277,13 @@ class Interface:
         # Кнопка "до конца"
         to_the_end_button = ttk.Button(self.root, textvariable=self.to_the_end_button_text, command=self.to_the_end_button_click)
         to_the_end_button.grid(row=8, column=3, columnspan=1, pady=10)
+
+        return 
+    
+    def init_button_vars(self) -> None:
+
+        self.iter_button_text = tk.StringVar(value="СТАРТ")
+        self.to_the_end_button_text = tk.StringVar(value="ДО КОНЦА")
 
         return 
     
@@ -367,19 +377,44 @@ class Interface:
         print("Reset")
 
         # возврат слайдеров к дефолтным значениями
-        self.init_interface_vars()
-
+        self.reset_interface_vars()
         # обновление финансовых показателей и состояния страховой компании (удаление всех договоров и тд)
         self.experiment.reset()
 
         # обновление значений окошек с финансовыми показателями (устанавливается начальное состояние)
         self.display_updated_finance()
 
-        # обновление текста кнопок
-        self.update_button_texts()
-
+        # установка исходного текста кнопок
+        self.reset_button_vars()
         return 
     
+
+    def reset_interface_vars(self) -> None:
+        # установка начальных значений слайдеров
+        self.auto_slider_price.set(5)
+        self.auto_slider_time.set(5)
+        self.auto_slider_refund.set(50)
+
+        self.med_slider_price.set(2)
+        self.med_slider_time.set(5)
+        self.med_slider_refund.set(10)
+
+        # установка начальных значений прочих параметров моделирования
+        self.insurance_prob.set(7)
+        self.tax_percent.set(10)
+        self.modeling_duration.set(12)
+        self.base_demand.set(10)
+
+        self.reset_button_vars()
+        
+    
+    def reset_button_vars(self) -> None:
+
+        self.iter_button_text.set("СТАРТ")
+        self.to_the_end_button_text.set("ДО КОНЦА")
+
+        return 
+
     def to_the_end_button_click(self) -> None:
 
         self.experiment.to_the_end()
@@ -396,6 +431,8 @@ class Interface:
     
     
     def iteration_button_click(self) -> None: 
+
+        # проверка на завершение моделирования
         self.experiment.iteration_button_click()
         self.display_updated_finance()
 

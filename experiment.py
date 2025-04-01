@@ -31,12 +31,13 @@ class Experiment:
 
         # количественные показатели
         self.cur_auto_sold : int = 0 
-        self.cur_estate_sol : int = 0 
         self.cur_med_sold : int = 0 
+        self.cur_estate_sol : int = 0 
 
+    
         self.cur_auto_ins_cases : int = 0
-        self.cur_estate_ins_cases : int = 0 
         self.cur_med_ins_cases : int = 0 
+        self.cur_estate_ins_cases : int = 0 
 
         # налог
         self.tax_percent = 10
@@ -91,10 +92,12 @@ class Experiment:
     def update_sell(self,sell_stats:Dict[str,Tuple[int,int]]):
         # распаковка значений
         auto_sold_quantity,auto_profit = sell_stats["auto"]
+        med_sold_quantity,med_profit = sell_stats["med"]
 
         self.cur_auto_sold = auto_sold_quantity
-        self.cur_profit += auto_profit
+        self.cur_med_sold = med_sold_quantity
 
+        self.cur_profit += (auto_profit + med_profit)
         return
     
     # изменяет внутренее состояние после убытков в виде налогов и страховых случаев
@@ -261,6 +264,10 @@ class Experiment:
     def print_quantity(self) -> None:
         print(f"Количество проданных автостраховок: {self.cur_auto_sold}")
         print(f"Количество страховых случаев (авто): {self.cur_auto_ins_cases}")
+
+        print(f"Количество проданных медстраховок: {self.cur_med_sold}")
+        print(f"Количество страховых случаев (мед): {self.cur_med_ins_cases}")
+
         return 
     
 

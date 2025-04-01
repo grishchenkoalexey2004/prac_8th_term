@@ -158,7 +158,7 @@ class InsuranceComp:
         # условия медстраховки (c заданными начальными значениями)
         self.med_slider_price : int = 2
         self.med_slider_time : int = 5
-        self.med_slider_refund : int = 20 
+        self.med_slider_refund : int = 10 
 
 
 
@@ -189,7 +189,7 @@ class InsuranceComp:
     """ Обновление на каждой итерации"""
     
     # добавление проданных страховок в клиентскую базу, создание новых договоров при изменении условий
-    def update_client_state(self,auto_demand,estate_demand = None,med_demand = None) -> None:
+    def update_client_state(self,auto_demand,med_demand,estate_demand = None) -> None:
         # смотрим, не обновились ли у нас условия страхования
         
         # если обновились условия страхования - создаём новый договор и меняем id действующего страхового договора
@@ -202,8 +202,17 @@ class InsuranceComp:
 
             self.auto_config_updated = False
 
+        if self.med_config_updated:
+            self.last_program_id+=1
+            self.cur_medprog_id = self.last_program_id
+
+            new_agr = self.create_ins_agr("med",self.cur_medprog_id)
+            self.add_ins_agr(self.cur_medprog_id,new_agr)
+
         # добавляем клиентов в действующий страховой договор
         self.ins_agreements[self.cur_autoprog_id].add_clients(auto_demand,insurance_prob=self.insurance_prob)
+        self.ins_agreements[self.cur_medprog_id].add_clients(med_demand,insurance_prob=self.insurance_prob)
+
         
         # нужно добавить такую же логику про остальные типы страховок
         return None 
@@ -228,16 +237,16 @@ class InsuranceComp:
             prog_refund = self.auto_slider_refund
             prog_time = self.auto_slider_time
 
+        elif prog_type == "med":
+            prog_price = self.med_slider_price
+            prog_refund = self.med_slider_refund
+            prog_time = self.med_slider_time 
+
         # пока что привязаны к слайдерам от автостраховки
         elif prog_type == "estate":
             prog_price = self.auto_slider_price
             prog_refund = self.auto_slider_refund
             prog_time = self.auto_slider_time
-
-        elif prog_type == "med":
-            prog_price = self.auto_slider_price
-            prog_refund = self.auto_slider_refund
-            prog_time = self.auto_slider_time 
 
         else:
             raise ValueError
@@ -315,29 +324,40 @@ class InsuranceComp:
         auto_profit_coef = (self.auto_slider_refund*self.auto_slider_time)/self.auto_slider_price
         auto_add_demand = int(auto_profit_coef//self.auto_demand_delim)
         
-        auto_demand = self.calc_demand(self.base_demand,auto_add_demand)
+        auto_demand = self.calc_demand(auto_add_demand)
         auto_profit = auto_demand*self.auto_slider_price
 
+        med_profit_coef = (self.med_slider_refund*self.med_slider_time)/self.med_slider_price
+        med_add_demand = int(med_profit_coef//self.med_demand_delim)
 
-        return_object = {"auto" : (auto_demand,auto_profit)}
-        self.update_client_state(auto_demand)
+        med_demand = self.calc_demand(med_add_demand)
+        med_profit = med_demand*self.med_slider_price
+
+        self.update_client_state(auto_demand,med_demand)
+
+        return_object = {"auto" : (auto_demand,auto_profit),"med" : (med_demand,med_profit)}
+        
 
         return return_object
 
     # вычисляет случайную величину спроса по двум параметрам (базовый спрос + )
-    def calc_demand(self,base_demand:int,additional_demand:int) -> int:
+    def calc_demand(self,additional_demand:int) -> int:
         add_range = arange(0,additional_demand*2+1,step=1)
-        return base_demand + int(choice(add_range,size = None,p = None))
+        return self.base_demand + int(choice(add_range,size = None,p = None))
 
     def print_slider_values(self):
         print(f"Auto price: {self.auto_slider_price}")
         print(f"Auto time: {self.auto_slider_time}")
         print(f"Auto refund: {self.auto_slider_refund}")
-        print(f"Demand: {self.base_demand}")
 
+        print(f"Med price: {self.med_slider_price}")
+        print(f"Med time: {self.med_slider_time}")
+        print(f"Med refund: {self.med_slider_refund}")  
+
+        print(f"Demand: {self.base_demand}")
         return 
     
-
+    
     def print_programs(self):
         for id in self.progs_active:
             print(self.ins_agreements[id])
