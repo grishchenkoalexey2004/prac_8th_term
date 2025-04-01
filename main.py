@@ -1,10 +1,9 @@
+from interface import Interface
 
 
 
-from interface import Interface 
-
-
-interface = Interface()
-
-interface.run() 
-
+if __name__ == "__main__":
+    interface = Interface() 
+    interface.run() 
+    
+    
