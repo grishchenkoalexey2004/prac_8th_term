@@ -58,15 +58,13 @@ class Experiment:
         loss_stats = self.ins_company.gen_ins_cases()
         self.update_loss(loss_stats)
         
-        self.cur_net_profit = self.cur_profit - self.cur_loss
-        self.networth += self.cur_net_profit
+         
+        self.networth += self.cur_profit - self.cur_loss
 
         # изменяет капитал, вычитая налог
         self.apply_tax()
 
-        # обновление чистой прибыли и капитала
-        self.cur_net_profit = self.cur_profit - self.cur_loss
-        self.networth += self.cur_net_profit
+        self.cur_net_profit = self.cur_profit-self.cur_loss-self.tax_value
 
         self.print_state()
 
@@ -137,6 +135,10 @@ class Experiment:
 
         return 
     
+    def reset_tax(self) -> None:
+        self.tax_value = 0 
+        return 
+    
 
     def reset_modeling_params(self) -> None:
         self.auto_config_updated = False 
@@ -158,6 +160,7 @@ class Experiment:
 
         self.reset_sell() 
         self.reset_loss() 
+        self.reset_tax()
 
         self.modeling_started = False
         self.modeling_finished = False   

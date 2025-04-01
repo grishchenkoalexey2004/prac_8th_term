@@ -44,7 +44,6 @@ class Interface:
         self.tax_percent : tk.Variable = None
 
 
-
     # процедура запуска всей программы
     def run(self) -> None: 
         
