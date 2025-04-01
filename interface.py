@@ -47,11 +47,14 @@ class Interface:
         # вероятность возникновения страхового случая
         self.insurance_prob : tk.Variable = None 
 
-        # текст кнопки старт/итерация (может меняться в зависимости от состояния моделирования)
+        # текст кнопки СТАРТ/итерация (может меняться в зависимости от состояния моделирования)
         self.iter_button_text : tk.StringVar = None
+        self.to_the_end_button_text : tk.StringVar = None 
 
         # процент налога
         self.tax_percent : tk.Variable = None
+
+    
 
 
     # процедура запуска всей программы
@@ -93,9 +96,9 @@ class Interface:
         self.tax_percent = tk.Variable(value = 10)
         self.modeling_duration = tk.Variable(value = 12)
 
-        # установка текста кнопки старт
-        self.iter_button_text = tk.StringVar(value="Старт")
-
+        # установка текста кнопки СТАРТ
+        self.iter_button_text = tk.StringVar(value="СТАРТ")
+        self.to_the_end_button_text = tk.StringVar(value="ДО КОНЦА")
         return
 
 
@@ -211,7 +214,7 @@ class Interface:
         exit_button.grid(row=6, column=2, columnspan=1, pady=10)
 
         # Кнопка "до конца"
-        to_the_end_button = ttk.Button(self.root, text="ДО КОНЦА", command=self.to_the_end_button_click)
+        to_the_end_button = ttk.Button(self.root, textvariable=self.to_the_end_button_text, command=self.to_the_end_button_click)
         to_the_end_button.grid(row=6, column=3, columnspan=1, pady=10)
 
         return 
@@ -255,7 +258,6 @@ class Interface:
         return 
         
     
- 
     """ Обработчики кнопок """
 
     def update_auto_config(self,event):
@@ -294,8 +296,8 @@ class Interface:
         self.modeling_duration.set(12)
         # кнопки
 
-        self.iter_button_text.set("Старт")
-
+        self.iter_button_text.set("СТАРТ")
+        self.to_the_end_button_text.set("ДО КОНЦА")
         return 
     
     def exit_button_click(self) -> None:
@@ -323,6 +325,13 @@ class Interface:
         self.experiment.to_the_end()
 
         self.display_updated_finance()
+
+        # меняем текст кнопки "до конца" в зависимости от состояния моделирования
+        if self.experiment.is_bankrupt:
+            self.to_the_end_button_text.set("Банкрот")
+        else:
+            self.to_the_end_button_text.set("УСПЕХ")
+
         return 
     
     
@@ -330,8 +339,16 @@ class Interface:
         self.experiment.iteration_button_click()
         self.display_updated_finance()
 
-        if self.experiment.modeling_started:
+        # меняем текст кнопки итерации в зависимости от состояния моделирования
+        if self.experiment.is_bankrupt:
+            self.iter_button_text.set("Банкрот")
+
+        elif self.experiment.modeling_finished:
+            self.iter_button_text.set("УСПЕХ")
+            
+        else:
             self.iter_button_text.set("Сделать шаг")
+
         return 
     
     """ Обновление числовых полей после итерации """
@@ -381,5 +398,3 @@ class Interface:
 
         return 
 
-if __name__ == "__main__":
-    pass 
