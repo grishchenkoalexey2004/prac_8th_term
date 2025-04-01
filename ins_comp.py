@@ -15,6 +15,7 @@
 from typing import Dict,Tuple,List
 from random import randint
 from numpy.random import binomial,uniform,choice
+from numpy import arange
 
 
 class InsuranceAgreement:
@@ -132,6 +133,13 @@ class InsuranceComp:
         # "база" клиентов
         self.progs_active: List[int] = [] 
         self.ins_agreements: Dict[int,InsuranceAgreement] = dict()
+
+
+        # делители коэф-тов для вычисления добавочного спроса (чем больше делитель тем менее эластичный спрос)
+
+        self.auto_demand_delim = 10
+        self.estate_demand_delim = 15 
+        self.med_demand_delim = 5 
 
 
         """ Параметры моделирования и флаги"""
@@ -285,8 +293,9 @@ class InsuranceComp:
         # вычисление коэ-фта выгодности 
         
         auto_profit_coef = (self.auto_slider_refund*self.auto_slider_time)/self.auto_slider_price
-        auto_add_demand = int(auto_profit_coef//10)
-        auto_demand = self.auto_slider_base_demand + auto_add_demand + randint(-1*auto_add_demand,5)
+        auto_add_demand = int(auto_profit_coef//self.auto_demand_delim)
+        
+        auto_demand = self.calc_demand(self.auto_slider_base_demand,auto_add_demand)
         auto_profit = auto_demand*self.auto_slider_price
 
 
@@ -294,6 +303,11 @@ class InsuranceComp:
         self.update_client_state(auto_demand)
 
         return return_object
+
+    # вычисляет случайную величину спроса по двум параметрам (базовый спрос + )
+    def calc_demand(self,base_demand:int,additional_demand:int) -> int:
+        add_range = arange(0,additional_demand*2+1,step=1)
+        return base_demand + int(choice(add_range,size = None,p = None))
 
     def print_slider_values(self):
         print(f"Auto price: {self.auto_slider_price}")
