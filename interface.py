@@ -25,6 +25,7 @@ class Interface:
         self.loss_entry: ttk.Entry = None
         self.net_profit_entry : ttk.Entry = None 
         self.tax_entry : ttk.Entry = None
+        self.curmonth_entry : ttk.Entry = None
 
 
         """ Константные переменные интерфейса """
@@ -33,9 +34,9 @@ class Interface:
         self.refund_slider_len = 170
 
         self.common_label_fond = ("Arial",12)
+        self.large_label_font = ("Arial",20)
 
         """ Переменные графического интерфейса """
-
         # Текущие значения слайдеров автостраховки (нельзя определять до построения интерфейса, поэтому None)
         self.auto_slider_price : tk.Variable = None
         self.auto_slider_time : tk.Variable = None
@@ -45,7 +46,7 @@ class Interface:
         # вероятность возникновения страхового случая
         self.insurance_prob : tk.Variable = None 
 
-
+        # текст кнопки старт/итерация (может меняться в зависимости от состояния моделирования)
         self.iter_button_text : tk.StringVar = None
 
         # процент налога
@@ -145,8 +146,8 @@ class Interface:
     def init_numeric_entries(self) -> None:
         # networth_label = ttk.Label(self.root,textvariable = self.experiment.networth)
         # networth_label.grid(row = 1,column = 4,pady = 10,padx = 10)
-        params_label = ttk.Label(self.root,text="Капитал в у.е.д.",font=("Arial",12))
-        params_label.grid(row=1, column=5, padx=0, pady=0)
+        networth_label = ttk.Label(self.root,text="Капитал в у.е.д.",font=("Arial",12))
+        networth_label.grid(row=1, column=5, padx=0, pady=0)
 
         self.networth_entry = ttk.Entry()
         self.networth_entry.grid(row=2,column =5,padx = 0,pady = 0)
@@ -177,6 +178,12 @@ class Interface:
         self.tax_entry = ttk.Entry()
         self.tax_entry.grid(row = 10,column = 5,padx = 0,pady = 0)
         
+        # Текущий месяц (в верху окошка)
+        curmonth_label = ttk.Label(self.root,text = "Текущий месяц:",font = self.common_label_fond)
+        curmonth_label.grid(row = 0,column = 1,padx = 10,pady = 10)
+
+        self.curmonth_entry = ttk.Entry()
+        self.curmonth_entry.grid(row = 0,column = 2,padx = 10,pady = 10)
         return
 
     def init_buttons(self) -> None:
@@ -195,7 +202,6 @@ class Interface:
         # Кнопка "до конца"
         to_the_end_button = ttk.Button(self.root, text="ДО КОНЦА", command=self.to_the_end_button_click)
         to_the_end_button.grid(row=5, column=3, columnspan=1, pady=10)
-    
 
         return 
     
@@ -205,14 +211,21 @@ class Interface:
 
         return 
     
-    def init_gui(self) -> None:
+    def init_top_labels(self) -> None: 
 
-        # подпись Параметры
-        params_label = ttk.Label(self.root,text="ПАРАМЕТРЫ",font=("Arial",20))
+        results_label = ttk.Label(self.root,text = "РЕЗУЛЬТАТЫ",font = self.large_label_font)
+        results_label.grid(row = 0,column = 5,padx = 10,pady = 10)
+
+
+        params_label = ttk.Label(self.root,text="ПАРАМЕТРЫ",font = self.large_label_font)
         params_label.grid(row = 0, column=0, padx=10, pady=10)
 
-        results_label = ttk.Label(self.root,text = "РЕЗУЛЬТАТЫ",font = ("Arial",20))
-        results_label.grid(row = 0,column = 5,padx = 10,pady = 10)
+        return
+
+
+    def init_gui(self) -> None:
+        # Инициализация верхних надписей
+        self.init_top_labels()
 
         # Создание слайдеров настройки программ автострахования
         self.init_sliders() 
@@ -224,6 +237,9 @@ class Interface:
         self.init_numeric_entries()
 
         self.init_separators()
+
+        # установка начальных значений числовых полей
+        self.display_updated_finance()
 
         return 
         
@@ -280,7 +296,7 @@ class Interface:
         # обновление финансовых показателей и состояния страховой компании (удаление всех договоров и тд)
         self.experiment.reset()
 
-        # обновление значений окошек с финансовыми показателями
+        # обновление значений окошек с финансовыми показателями (устанавливается начальное состояние)
         self.display_updated_finance()
 
         return 
@@ -308,11 +324,11 @@ class Interface:
         self.refresh_loss_entry()
         self.refresh_net_profit_entry()
         self.refresh_tax_entry()
-
+        self.refresh_curmonth_entry()
         return 
 
     def refresh_networth_entry(self) -> None:
-        # сразу делим на 50, чтобы наверняка удалить все число
+        # сразу делим на 50, чтобы наверняка удалить всё число
         self.networth_entry.delete(0,50)
         self.networth_entry.insert(0,str(self.experiment.networth))
 
@@ -340,6 +356,13 @@ class Interface:
     def refresh_tax_entry(self) -> None:
         self.tax_entry.delete(0,50)
         self.tax_entry.insert(0,str(self.experiment.tax_value))
+
+
+    def refresh_curmonth_entry(self) -> None:
+        self.curmonth_entry.delete(0,50)
+        self.curmonth_entry.insert(0,str(self.experiment.curmonth))
+
+        return 
 
 if __name__ == "__main__":
     pass 
