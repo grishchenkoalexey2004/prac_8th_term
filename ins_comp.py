@@ -362,7 +362,7 @@ class InsuranceComp:
     def calc_demand(self,additional_demand:int) -> int:
         add_range = arange(0,additional_demand*2+1,step=1)
         return self.base_demand + int(choice(add_range,size = None,p = None))
-
+    
     def print_slider_values(self):
         print(f"Auto price: {self.auto_slider_price}")
         print(f"Auto time: {self.auto_slider_time}")

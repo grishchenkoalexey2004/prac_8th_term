@@ -453,7 +453,6 @@ class Interface:
         return 
 
     def reset_button_click(self) -> None:
-        print("Reset")
 
         # возврат слайдеров к дефолтным значениями
         self.reset_interface_vars()

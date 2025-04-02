@@ -70,7 +70,7 @@ class Experiment:
 
         self.cur_net_profit = self.cur_profit-self.cur_loss-self.tax_value
 
-        self.print_state()
+        # self.print_state()
 
         # обновление дат 
         self.ins_company.update_dates()
@@ -78,11 +78,9 @@ class Experiment:
 
         # временно поставил 10 - конец симуляции по времени
         if self.curmonth>self.modeling_duration:
-            print("Симуляция завершена")
             self.modeling_finished = True 
 
         if self.networth<0:
-            print("Компания обанкротилась")
             self.is_bankrupt = True
 
         # если какой либо из флагов установлен в True, то моделирование закончено
@@ -180,19 +178,11 @@ class Experiment:
 
 
         if not self.modeling_started:
-            print("Моделирование запущено!")
             self.modeling_started = True
  
 
         # проверяем остались ли еще итерации и не обанкротилась ли компания
         if self.modeling_finished or self.is_bankrupt:
-
-            if self.modeling_finished:
-                print("Моделирование завершено!, нажмите Reset")
-
-            if self.is_bankrupt:
-                print("Компания обанкротилась!")
-
             return True
 
         else:
