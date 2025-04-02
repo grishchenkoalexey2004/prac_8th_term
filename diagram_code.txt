@@ -128,7 +128,7 @@ class InsuranceAgreement{
     + gen_insurance_cases() : Tuple[int,int]
 }
 
-MainController "1" --> "1" Experiment
+Interface "1" --> "1" Experiment
 Experiment "1" --> "1" InsuranceComp
 InsuranceComp "1" --> "many" InsuranceAgreement
 @enduml

@@ -146,7 +146,7 @@ class Interface:
         """ Установка слайдеров на остальные виды страховки """
 
         # базовый спрос на все виды страховок
-        demand_label = ttk.Label(self.root, text = "Базовый спрос на все виды страховок в ед.:", font=self.common_label_font)
+        demand_label = ttk.Label(self.root, text = "Базовый спрос на все виды страховок  (ед)", font=self.common_label_font)
         demand_label.grid(row=4, column=0, padx=10, pady=10)
 
         # слайдер базового спроса на все виды страховок
@@ -156,7 +156,7 @@ class Interface:
 
 
         # вероятность страхового случая
-        insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая в процентах:", font=self.common_label_font)
+        insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая  (%)", font=self.common_label_font)
         insurance_prob_label.grid(row=5, column=0, padx=10, pady=10)
 
         # слайдер регулировки вероятности возникновения страховых случаев 
@@ -165,7 +165,7 @@ class Interface:
         insurance_prob_slider.grid(row=5, column=1, padx=10, pady=10)
 
         # налог
-        tax_label = ttk.Label(self.root, text = "Налог в процентах:", font=self.common_label_font)
+        tax_label = ttk.Label(self.root, text = "Налог (%)", font=self.common_label_font)
         tax_label.grid(row=6, column=0, padx=10, pady=10)
 
         # слайдер регулировки налога
@@ -174,7 +174,7 @@ class Interface:
         tax_slider.grid(row=6, column=1, padx=10, pady=10)
 
 
-        modeling_label = ttk.Label(self.root, text = "Срок  моделирования (в мес.):", font=self.common_label_font)
+        modeling_label = ttk.Label(self.root, text = "Срок  моделирования  (мес):", font=self.common_label_font)
         modeling_label.grid(row=7, column=0, padx=10, pady=10)
 
         # слайдер регулировки срока моделирования
@@ -192,19 +192,19 @@ class Interface:
 
         # сладер стоимости автостраховки
         auto_slider_price = tk.Scale(self.root, from_=3, to=10, length = self.price_slider_len,orient="horizontal",
-                                     label = "цена в у.е.д.",resolution =1,
+                                     label = "цена (у.д.е)",resolution =1,
                                      variable = self.auto_slider_price,command = self.update_auto_config)
         auto_slider_price.grid(row=1, column=1, padx=10, pady=10)
 
         # слайдер времени действия
         auto_slider_time = tk.Scale(self.root, from_=3, to=12, length = self.time_slider_len, orient="horizontal",
-                                    label = "время в мес.",resolution =1,
+                                    label = "время (мес)",resolution =1,
                                     variable = self.auto_slider_time,command = self.update_auto_config)
         auto_slider_time.grid(row=1, column=2, padx=10, pady=10)
 
         # слайдер возмещения
         auto_slider_refund = tk.Scale(self.root, from_=10, to=75, length = self.refund_slider_len, orient="horizontal",
-                                      label = "макс.возвр. у.е.д.",resolution =1,
+                                      label = "макс.возвр. (у.д.е)",resolution =1,
                                       variable = self.auto_slider_refund,command = self.update_auto_config)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
@@ -220,19 +220,19 @@ class Interface:
 
         # слайдер стоимости страховки
         med_slider_price = tk.Scale(self.root, from_=1, to=4, length=self.price_slider_len, orient="horizontal",
-                                  label="цена в у.е.д.", resolution=1,
+                                  label="цена (у.д.е)", resolution=1,
                                   variable=self.med_slider_price, command=self.update_med_config)
         med_slider_price.grid(row=2, column=1, padx=10, pady=10)
 
         # слайдер времени действия
         med_slider_time = tk.Scale(self.root, from_=1, to=12, length=self.time_slider_len, orient="horizontal",
-                                 label="время в мес.", resolution=1,
+                                 label="время (мес)", resolution=1,
                                  variable=self.med_slider_time, command=self.update_med_config)
         med_slider_time.grid(row=2, column=2, padx=10, pady=10)
 
         # слайдер возмещения
         med_slider_refund = tk.Scale(self.root, from_=5, to=15, length=self.refund_slider_len, orient="horizontal",
-                                   label="макс.возвр. в у.е.д.", resolution=1,
+                                   label="макс.возвр. (у.д.е)", resolution=1,
                                    variable=self.med_slider_refund, command=self.update_med_config)
         med_slider_refund.grid(row=2, column=3, padx=10, pady=10)
 
@@ -246,19 +246,19 @@ class Interface:
         
         # слайдер стоимости страховки
         estate_slider_price = tk.Scale(self.root, from_=5, to=13, length=self.price_slider_len, orient="horizontal",
-                                  label="цена в у.е.д.", resolution=1,
+                                  label="цена (у.д.е)", resolution=1,
                                   variable=self.estate_slider_price, command=self.update_estate_config)
         estate_slider_price.grid(row=3, column=1, padx=10, pady=10)
         
         # слайдер времени действия
         estate_slider_time = tk.Scale(self.root, from_=6, to=18, length=self.time_slider_len, orient="horizontal",
-                                 label="время в мес.", resolution=1,
+                                 label="время (мес)", resolution=1,
                                  variable=self.estate_slider_time, command=self.update_estate_config)
         estate_slider_time.grid(row=3, column=2, padx=10, pady=10)
         
         # слайдер возмещения
         estate_slider_refund = tk.Scale(self.root, from_=25, to=100, length=self.refund_slider_len, orient="horizontal",
-                                      label="макс.возвр. в у.е.д.", resolution=1,
+                                      label="макс.возвр. (у.д.е)", resolution=1,
                                       variable=self.estate_slider_refund, command=self.update_estate_config)
         estate_slider_refund.grid(row=3, column=3, padx=10, pady=10)    
 
@@ -268,31 +268,31 @@ class Interface:
     def init_numeric_entries(self) -> None:
         # networth_label = ttk.Label(self.root,textvariable = self.experiment.networth)
         # networth_label.grid(row = 1,column = 4,pady = 10,padx = 10)
-        networth_label = ttk.Label(self.root,text="Капитал в у.е.д.",font=("Arial",12))
+        networth_label = ttk.Label(self.root,text="Капитал (у.д.е)",font=("Arial",12))
         networth_label.grid(row=1, column=5, padx=0, pady=0)
 
         self.networth_entry = ttk.Entry()
         self.networth_entry.grid(row=2,column =5,padx = 0,pady = 0)
 
-        params_label = ttk.Label(self.root,text="Прибыль в у.е.д.",font=("Arial",12))
+        params_label = ttk.Label(self.root,text="Прибыль (у.д.е)",font=("Arial",12))
         params_label.grid(row=3, column=5, padx=0, pady=0)
 
         self.profit_entry = ttk.Entry()
         self.profit_entry.grid(row = 4,column = 5,padx = 0,pady = 0)
 
-        params_label = ttk.Label(self.root,text="Убыток в у.е.д.",font=("Arial",12))
+        params_label = ttk.Label(self.root,text="Убыток (у.д.е)",font=("Arial",12))
         params_label.grid(row=5, column=5, padx=0, pady=0)
 
         self.loss_entry = ttk.Entry()
         self.loss_entry.grid(row = 6,column = 5,padx = 0,pady = 0)
 
-        params_label = ttk.Label(self.root,text="Чистая прибыль в у.е.д.",font=("Arial",12))
+        params_label = ttk.Label(self.root,text="Чистая прибыль (у.д.е)",font=("Arial",12))
         params_label.grid(row=7, column=5, padx=0, pady=0)
 
         self.net_profit_entry = ttk.Entry()
         self.net_profit_entry.grid(row = 8,column = 5,padx = 0,pady = 0)
 
-        tax_label = ttk.Label(self.root,text="Налог в у.е.д.",font=("Arial",12))
+        tax_label = ttk.Label(self.root,text="Налог (у.д.е)",font=("Arial",12))
         tax_label.grid(row=9, column=5, padx=0, pady=0)
 
         self.tax_entry = ttk.Entry()
