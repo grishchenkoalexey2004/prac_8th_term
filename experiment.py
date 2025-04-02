@@ -32,7 +32,7 @@ class Experiment:
         # количественные показатели
         self.cur_auto_sold : int = 0 
         self.cur_med_sold : int = 0 
-        self.cur_estate_sol : int = 0 
+        self.cur_estate_sold : int = 0 
 
     
         self.cur_auto_ins_cases : int = 0
@@ -93,11 +93,13 @@ class Experiment:
         # распаковка значений
         auto_sold_quantity,auto_profit = sell_stats["auto"]
         med_sold_quantity,med_profit = sell_stats["med"]
+        estate_sold_quantity,estate_profit = sell_stats["estate"]
 
         self.cur_auto_sold = auto_sold_quantity
         self.cur_med_sold = med_sold_quantity
+        self.cur_estate_sold = estate_sold_quantity
 
-        self.cur_profit += (auto_profit + med_profit)
+        self.cur_profit += (auto_profit + med_profit + estate_profit)
         return
     
     # изменяет внутренее состояние после убытков в виде налогов и страховых случаев
@@ -128,21 +130,21 @@ class Experiment:
     def reset_sell(self):
         self.cur_auto_sold = 0 
         self.cur_med_sold = 0
-        self.cur_estate_sol = 0 
+        self.cur_estate_sold = 0 
 
         self.cur_profit = 0 
         self.cur_net_profit = 0
         return 
 
+    # обнуляет показатели связанные с потерями денег (страховые случаи + налоги)
     def reset_loss(self) -> None:
-
         self.cur_loss = 0 
-        self.tax_value = 0 
 
         self.cur_auto_ins_cases = 0
         self.cur_estate_ins_cases = 0 
         self.cur_med_ins_cases = 0 
 
+        self.reset_tax()
         return 
     
     def reset_tax(self) -> None:
@@ -160,7 +162,6 @@ class Experiment:
 
         self.reset_sell() 
         self.reset_loss() 
-        self.reset_tax()
 
         self.modeling_started = False
         self.modeling_finished = False   
@@ -221,7 +222,17 @@ class Experiment:
         self.ins_company.med_slider_price = price
         self.ins_company.med_slider_time = time
         self.ins_company.med_slider_refund = refund
-        return 
+        return
+
+    def update_estate_config(self,price,time,refund):
+
+        self.ins_company.estate_config_updated = True 
+        self.ins_company.estate_slider_price = price
+        self.ins_company.estate_slider_time = time
+        self.ins_company.estate_slider_refund = refund
+        return
+
+     
     
     def update_base_demand(self,demand):
         self.ins_company.base_demand = demand

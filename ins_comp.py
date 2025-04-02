@@ -161,7 +161,10 @@ class InsuranceComp:
         self.med_slider_time : int = 5
         self.med_slider_refund : int = 10 
 
-
+        # условия страхования недвижимости
+        self.estate_slider_price : int = 7
+        self.estate_slider_time : int = 10
+        self.estate_slider_refund : int = 60 
 
     """ Инициализация """
     
@@ -190,7 +193,7 @@ class InsuranceComp:
     """ Обновление на каждой итерации"""
     
     # добавление проданных страховок в клиентскую базу, создание новых договоров при изменении условий
-    def update_client_state(self,auto_demand,med_demand,estate_demand = None) -> None:
+    def update_client_state(self,auto_demand,med_demand,estate_demand) -> None:
         # смотрим, не обновились ли у нас условия страхования
         
         # если обновились условия страхования - создаём новый договор и меняем id действующего страхового договора
@@ -212,10 +215,19 @@ class InsuranceComp:
 
             self.med_config_updated = False
 
+        if self.estate_config_updated:
+            self.last_program_id+=1
+            self.cur_estateprog_id = self.last_program_id
+            
+            new_agr = self.create_ins_agr("estate",self.cur_estateprog_id)
+            self.add_ins_agr(self.cur_estateprog_id,new_agr)
+
+            self.estate_config_updated = False
+
         # добавляем клиентов в действующий страховой договор
         self.ins_agreements[self.cur_autoprog_id].add_clients(auto_demand,insurance_prob=self.insurance_prob)
         self.ins_agreements[self.cur_medprog_id].add_clients(med_demand,insurance_prob=self.insurance_prob)
-
+        self.ins_agreements[self.cur_estateprog_id].add_clients(estate_demand,insurance_prob=self.insurance_prob)
         
         # нужно добавить такую же логику про остальные типы страховок
         return None 
@@ -247,9 +259,9 @@ class InsuranceComp:
 
         # пока что привязаны к слайдерам от автостраховки
         elif ins_type == "estate":
-            prog_price = self.auto_slider_price
-            prog_refund = self.auto_slider_refund
-            prog_time = self.auto_slider_time
+            prog_price = self.estate_slider_price
+            prog_refund = self.estate_slider_refund
+            prog_time = self.estate_slider_time
 
         else:
             raise ValueError
@@ -285,7 +297,11 @@ class InsuranceComp:
 
         self.med_slider_price = 2 
         self.med_slider_time = 5 
-        self.med_slider_refund = 20  
+        self.med_slider_refund = 10 
+
+        self.estate_slider_price : int = 7
+        self.estate_slider_time : int = 10
+        self.estate_slider_refund : int = 60 
 
         return 
 
@@ -338,9 +354,15 @@ class InsuranceComp:
         med_demand = self.calc_demand(med_add_demand)
         med_profit = med_demand*self.med_slider_price
 
-        self.update_client_state(auto_demand,med_demand)
+        estate_profit_coef = (self.estate_slider_refund*self.estate_slider_time)/self.estate_slider_price
+        estate_add_demand = int(estate_profit_coef//self.estate_demand_delim)
 
-        return_object = {"auto" : (auto_demand,auto_profit),"med" : (med_demand,med_profit)}
+        estate_demand = self.calc_demand(estate_add_demand)
+        estate_profit = estate_demand*self.estate_slider_price
+
+        self.update_client_state(auto_demand,med_demand,estate_demand)
+
+        return_object = {"auto" : (auto_demand,auto_profit),"med" : (med_demand,med_profit),"estate": (estate_demand,estate_profit)}
         
 
         return return_object
