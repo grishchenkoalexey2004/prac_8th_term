@@ -333,19 +333,19 @@ class Interface:
     def init_buttons(self) -> None:
         # Кнопка Reset
         button = ttk.Button(self.root, text="ЗАНОВО", command=self.reset_button_click)
-        button.grid(row = 8, column = 1, columnspan = 1,pady = 10,padx = 10)
+        button.grid(row = 13, column = 1, columnspan = 1,pady = 10,padx = 10)
 
         # Кнопка старт/итерация
         iter_button = ttk.Button(self.root, textvariable=self.iter_button_text, command=self.iteration_button_click)
-        iter_button.grid(row=8, column=0, columnspan=1, pady=10)
+        iter_button.grid(row = 13, column=0, columnspan=1, pady=10)
 
         # Кнопка Выход
         exit_button = ttk.Button(self.root, text="ВЫХОД", command=self.exit_button_click)
-        exit_button.grid(row=8, column=2, columnspan=1, pady=10)
+        exit_button.grid(row = 13, column=2, columnspan=1, pady=10)
 
         # Кнопка "до конца"
         to_the_end_button = ttk.Button(self.root, textvariable=self.to_the_end_button_text, command=self.to_the_end_button_click)
-        to_the_end_button.grid(row=8, column=3, columnspan=1, pady=10)
+        to_the_end_button.grid(row = 13, column=3, columnspan=1, pady=10)
 
         return 
     
@@ -358,7 +358,7 @@ class Interface:
     
     def init_separators(self) -> None:
         vert_sep = ttk.Separator(self.root, orient="vertical")
-        vert_sep.grid(column=4, row=0, rowspan=7, sticky="ns",ipadx=0)
+        vert_sep.grid(column=4, row=0, rowspan=17, sticky="ns",ipadx=0)
 
         return 
     
