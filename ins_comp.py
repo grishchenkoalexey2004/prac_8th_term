@@ -39,8 +39,6 @@ class InsuranceAgreement:
         # параметры генерации страховых случаев
         self.days_prob : List[float] = [1/self.prog_time for i in range(self.prog_time)]
         
-        # флаг наличия клиентов, подписавших договор
-        self.has_clients: bool = False 
         # на 0-ой позиции - кол-во клиентов у которых 1 мес до истечения договора, на второй ...
         self.client_list: List[int] = [0 for i in range(prog_time)]
         # на 0-ой позиции - кол-во страховых случаев, которые наступят в ближайший месяц, на 1-ой ... 
@@ -48,8 +46,6 @@ class InsuranceAgreement:
 
     # добавляет новых клиентов, подписавших договор на текущей итерации + заранее вычисляет страховые случаи
     def add_clients(self,client_num : int,insurance_prob : float) -> None:
-        if client_num!=0:
-            self.has_clients = True
 
         self.client_list[self.prog_time-1] = client_num
         self.calc_insurance_cases(client_num,insurance_prob)
@@ -145,8 +141,8 @@ class InsuranceComp:
         self.med_config_updated = False 
         self.estate_config_updated = False 
 
-        # вероятность возникновения страхвого случая
-        self.insurance_prob: float = 0.05 # будет настраиваемым параметром
+        # вероятность возникновения страхового случая
+        self.insurance_prob: float = 0.07
 
         # базовый спрос на все виды страховок
         self.base_demand : int = 10
@@ -168,13 +164,9 @@ class InsuranceComp:
 
     """ Инициализация """
     
-    def init_state(self) -> None:
-        self.init_programs_state()
-
-        return
-
     # инициализация переменных отслеживания программ страхования
-    def init_programs_state(self) -> None:
+    def init_state(self) -> None:
+
         self.cur_autoprog_id = 0 
         self.cur_estateprog_id = 1 
         self.cur_medprog_id = 2 
@@ -297,7 +289,7 @@ class InsuranceComp:
 
         self.med_slider_price = 2 
         self.med_slider_time = 5 
-        self.med_slider_refund = 10 
+        self.med_slider_refund = 10  
 
         self.estate_slider_price : int = 7
         self.estate_slider_time : int = 10
@@ -308,12 +300,11 @@ class InsuranceComp:
 
     def reset_programs(self) -> None: 
         self.last_program_id = 0 
-        self.client_num = 0
         self.progs_active.clear() 
         self.ins_agreements.clear()
 
         # создаем начальные значения после сброса
-        self.init_programs_state()
+        self.init_state()
         return 
     
     def reset_ins_prob(self):
@@ -392,23 +383,5 @@ class InsuranceComp:
         return
     
 
-# testing insurance case generation 
-# generation is performed by calculation of insurance cases in the group and distribution of them 
 if __name__ == "__main__":
-    number = int(input())
-    days = 12
-
-    p = 0.05
-
-    res = binomial(number,p = p,size = None)
-    
-
-
-    probs = [1/days for i in range(days)]
-    
-
-    positions = choice(days,size = res,p=probs)
-
-
-    print(res)
-    print(positions)
+    pass

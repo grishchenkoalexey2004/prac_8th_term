@@ -468,35 +468,6 @@ class Interface:
         return 
     
 
-    def reset_interface_vars(self) -> None:
-        # установка начальных значений слайдеров параметров страхования
-        self.auto_slider_price.set(5)
-        self.auto_slider_time.set(5)
-        self.auto_slider_refund.set(50)
-
-        self.med_slider_price.set(2)
-        self.med_slider_time.set(5)
-        self.med_slider_refund.set(10)
-
-        self.estate_slider_price.set(7)
-        self.estate_slider_time.set(10)
-        self.estate_slider_refund.set(60)
-    
-        # установка начальных значений прочих параметров моделирования
-        self.insurance_prob.set(7)
-        self.tax_percent.set(10)
-        self.modeling_duration.set(12)
-        self.base_demand.set(10)
-
-        self.reset_button_vars()
-        
-    
-    def reset_button_vars(self) -> None:
-
-        self.iter_button_text.set("СТАРТ")
-        self.to_the_end_button_text.set("ДО КОНЦА")
-
-        return 
 
     def to_the_end_button_click(self) -> None:
 
@@ -530,6 +501,37 @@ class Interface:
             self.iter_button_text.set("Сделать шаг")
 
         return 
+    
+    def reset_interface_vars(self) -> None:
+        # установка начальных значений слайдеров параметров страхования
+        self.auto_slider_price.set(5)
+        self.auto_slider_time.set(5)
+        self.auto_slider_refund.set(50)
+
+        self.med_slider_price.set(2)
+        self.med_slider_time.set(5)
+        self.med_slider_refund.set(10)
+
+        self.estate_slider_price.set(7)
+        self.estate_slider_time.set(10)
+        self.estate_slider_refund.set(60)
+    
+        # установка начальных значений прочих параметров моделирования
+        self.insurance_prob.set(7)
+        self.tax_percent.set(10)
+        self.modeling_duration.set(12)
+        self.base_demand.set(10)
+
+        self.reset_button_vars()
+        
+    
+    def reset_button_vars(self) -> None:
+
+        self.iter_button_text.set("СТАРТ")
+        self.to_the_end_button_text.set("ДО КОНЦА")
+
+        return 
+    
     
     """ Обновление числовых полей после итерации """
     def display_updated_finance(self) -> None:

@@ -1,7 +1,34 @@
 @startuml
-class MainController { 
-Главный класс программы
+class Interface { 
+Класс интерфейса программы
 ==
+    
+    
+    - experiment : Experiment 
+
+    + run() : void - метод с запуска которого начинается работа программы
+
+    + init_interface_vars() : void 
+    + init_sliders() : void
+    + init_numeric_entries() : void
+    + init_button() : void
+    + init_top_labels() : void
+    + init_gui() : void
+    
+    + reset_interface_vars() : void
+
+    Обработчики кнопок
+    + exit_button_click() : void
+    + reset_button_click() : void 
+    + iteration_button_click() : void
+    + to_the_end_button_click() : void
+
+}
+
+
+class Experiment { 
+Главный управляющий класс программы 
+== 
     - curmonth: Int
     - cur_networth: Int 
     - cur_profit: Int 
@@ -13,25 +40,25 @@ class MainController {
     - auto_sold: Int
     - estate_sold: Int
     - med_sold: Int
-    
+
     - ins_company: InsuranceComp
 
-    + run() : void
-    + reset() : void
-    + update_sell(sell_stats:Map[Str][Tuple[Int,Int]]) - учёт продажи страховок
-    + simulate_month() : void
+    + iteration_button_click() : bool - главный метод класса
+    + simulate_month(): bool
     
+    + to_the_end() : void
+    + reset() : void
+
+    + update_auto_config(price:int,time:int,demand:int) : void
+    + update_med_config(price:int,time:int,demand:int) : void 
+    + update_estate_config(price:int,time:int,demand:int) : void
 
 }
 
 class InsuranceComp{
 Класс страховой компании
 ==
-    Базовые спросы
-    - auto_base : Int 
-    - estate_base : Int
-    - med_base : Int 
-    
+    - base_demand : Int
 
     Флаги позволяющие отслеживать изменения условий страховых программ
     - auto_config_updated : bool
@@ -48,25 +75,31 @@ class InsuranceComp{
     - auto_price: Int
     - auto_time: Int
     - auto_refund: Int 
+
     - estate_price: Int
     - estate_time: Int
     - estate_refund : Int
+
     - med_price: Int
     - med_time: Int
     - med_refund : Int
 
-    - client_number: Int - общее число клиентов 
     - ins_progs_active: List[Int] - id действующих страховых программ (по которым еще есть неистекшие договора)
     - ins_progs: Map[Int][InsuranceAgreement] - пары(id страхового договора, страх договор)
 
     + init_state() : void
-    + update_client_state(auto_demand:int,estate_demand:int,med_demand:int) : void - добавл. новых клиентов
-    + update_dates() : void
-    + add_ins_agr(prog_id:int,ins_agr: InsuranceAgreement) : void
-    + reset() : void
-    + reset_programs() : void
-    + gen_ins_cases() : Map[Str][Int]
-    + gen_demand() : Map[str][Int] - (колво купл. страховок, прибыль) по каждому типу страховки
+    + update_client_state() : void 
+    + update_dates() : void 
+    + create_ins_agr(ins_type: str,prog_id : int) : InsuranceAgreement
+    + add_ins_agr(prog_id: int,ins_agr: InsuranceAgreement)
+
+    + reset()
+
+    + gen_demand() : Map[str][Tuple[int,int]]
+    + calc_demand(additional_demand:int) : int
+
+    + gen_ins_cases() : Map[Str][List[int]]
+    
 }
 
 
@@ -79,15 +112,23 @@ class InsuranceAgreement{
     - program_time: Int 
     - program_refund: Int
 
+    - days_prob: List[Int]
+    - client_list: List[Int]
+    - insurance_cases: List[Int] - просчитанные страховые случаи (по месяцам)
+
+
     - has_clients: bool
     - client_list: List[Int]
     
     + add_clients(client_arr:List[Int]) : void
     + update_dates() : int - количество клиентов расторгнувших договор
-    + gen_insurance_cases() : Int - сумма выплат по данному договору на данной итерации    
+
+    + calc_insurance_cases(client_num:int, insurance_prob : float) : int
+    + update_insurance_cases() : void
+    + gen_insurance_cases() : Tuple[int,int]
 }
 
-MainController "1" --> "1" InsuranceComp
+MainController "1" --> "1" Experiment
+Experiment "1" --> "1" InsuranceComp
 InsuranceComp "1" --> "many" InsuranceAgreement
-
 @enduml
