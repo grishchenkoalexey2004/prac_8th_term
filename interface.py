@@ -27,11 +27,16 @@ class Interface:
         self.tax_entry : ttk.Entry = None
         self.curmonth_entry : ttk.Entry = None
 
+        # поля вывода количества страховых случаев
+        self.auto_ins_cases_entry : ttk.Entry = None
+        self.med_ins_cases_entry : ttk.Entry = None
+        self.estate_ins_cases_entry : ttk.Entry = None
+
 
         """ Константные переменные интерфейса """
         self.price_slider_len = 150
         self.time_slider_len = 150 
-        self.refund_slider_len = 170
+        self.refund_slider_len = 200
 
         self.common_label_font = ("Arial",12)
         self.large_label_font = ("Arial",20)
@@ -127,41 +132,41 @@ class Interface:
         self.init_med_sliders()
 
         # базовый спрос на все виды страховок
-        demand_label = ttk.Label(self.root, text = "Базовый спрос на все виды страховок:", font=self.common_label_font)
-        demand_label.grid(row=2, column=0, padx=10, pady=10)
+        demand_label = ttk.Label(self.root, text = "Базовый спрос на все виды страховок в ед.:", font=self.common_label_font)
+        demand_label.grid(row=3, column=0, padx=10, pady=10)
 
         # слайдер базового спроса на все виды страховок
         demand_slider = tk.Scale(self.root, from_=2, to=20, orient="horizontal",resolution =1,command = self.update_base_demand,
                                       variable = self.base_demand)
-        demand_slider.grid(row=2, column=1, padx=10, pady=10)
+        demand_slider.grid(row=3, column=1, padx=10, pady=10)
 
 
         # вероятность страхового случая
         insurance_prob_label = ttk.Label(self.root, text = "Вероятность страхового случая в процентах:", font=self.common_label_font)
-        insurance_prob_label.grid(row=3, column=0, padx=10, pady=10)
+        insurance_prob_label.grid(row=4, column=0, padx=10, pady=10)
 
         # слайдер регулировки вероятности возникновения страховых случаев 
         insurance_prob_slider = tk.Scale(self.root, from_ = 4,to = 25,orient="horizontal",resolution = 1,
                                        variable = self.insurance_prob,command = self.update_insurance_prob)
-        insurance_prob_slider.grid(row=3, column=1, padx=10, pady=10)
+        insurance_prob_slider.grid(row=4, column=1, padx=10, pady=10)
 
         # налог
         tax_label = ttk.Label(self.root, text = "Налог в процентах:", font=self.common_label_font)
-        tax_label.grid(row=4, column=0, padx=10, pady=10)
+        tax_label.grid(row=5, column=0, padx=10, pady=10)
 
         # слайдер регулировки налога
         tax_slider = tk.Scale(self.root, from_ = 4,to = 20,orient="horizontal",resolution = 1,
                                        variable = self.tax_percent,command = self.update_tax)
-        tax_slider.grid(row=4, column=1, padx=10, pady=10)
+        tax_slider.grid(row=5, column=1, padx=10, pady=10)
 
 
-        modeling_label = ttk.Label(self.root, text = "Срок  моделирования:", font=self.common_label_font)
-        modeling_label.grid(row=5, column=0, padx=10, pady=10)
+        modeling_label = ttk.Label(self.root, text = "Срок  моделирования (в мес.):", font=self.common_label_font)
+        modeling_label.grid(row=6, column=0, padx=10, pady=10)
 
         # слайдер регулировки срока моделирования
         modeling_slider = tk.Scale(self.root, from_ = 8,to = 24,orient="horizontal",resolution = 1,
                                     variable = self.modeling_duration, command = self.update_modeling_duration)
-        modeling_slider.grid(row=5, column=1, padx=10, pady=10)
+        modeling_slider.grid(row=6, column=1, padx=10, pady=10)
 
         return 
     
@@ -184,7 +189,7 @@ class Interface:
 
         # слайдер возмещения
         auto_slider_refund = tk.Scale(self.root, from_=10, to=100, length = self.refund_slider_len, orient="horizontal",
-                                      label = "возврат в у.е.д.",resolution =1,
+                                      label = "макс.возвр. у.е.д.",resolution =1,
                                       variable = self.auto_slider_refund,command = self.update_auto_config)
         auto_slider_refund.grid(row=1, column=3, padx=10, pady=10)
 
@@ -196,25 +201,25 @@ class Interface:
     def init_med_sliders(self) -> None:
         # надпись "МЕД"
         med_slider_label = ttk.Label(self.root, text="МЕДИЦИНА:", font=("Arial", 16))
-        med_slider_label.grid(row=6, column=0, padx=10, pady=10)
+        med_slider_label.grid(row=2, column=0, padx=10, pady=10)
 
         # слайдер стоимости страховки
         med_slider_price = tk.Scale(self.root, from_=1, to=4, length=self.price_slider_len, orient="horizontal",
                                   label="цена в у.е.д.", resolution=1,
                                   variable=self.med_slider_price, command=self.update_med_config)
-        med_slider_price.grid(row=6, column=1, padx=10, pady=10)
+        med_slider_price.grid(row=2, column=1, padx=10, pady=10)
 
         # слайдер времени действия
         med_slider_time = tk.Scale(self.root, from_=1, to=12, length=self.time_slider_len, orient="horizontal",
                                  label="время в мес.", resolution=1,
                                  variable=self.med_slider_time, command=self.update_med_config)
-        med_slider_time.grid(row=6, column=2, padx=10, pady=10)
+        med_slider_time.grid(row=2, column=2, padx=10, pady=10)
 
         # слайдер возмещения
         med_slider_refund = tk.Scale(self.root, from_=5, to=15, length=self.refund_slider_len, orient="horizontal",
-                                   label="возврат в у.е.д.", resolution=1,
+                                   label="макс.возвр. в у.е.д.", resolution=1,
                                    variable=self.med_slider_refund, command=self.update_med_config)
-        med_slider_refund.grid(row=6, column=3, padx=10, pady=10)
+        med_slider_refund.grid(row=2, column=3, padx=10, pady=10)
 
         return
     
@@ -259,6 +264,24 @@ class Interface:
 
         self.curmonth_entry = ttk.Entry()
         self.curmonth_entry.grid(row = 0,column = 2,padx = 10,pady = 10)
+
+
+        # поля вывода количества страховых случаев
+        auto_ins_cases_label = ttk.Label(self.root,text = "Кол-во страх. случаев (авто):",font = self.common_label_font)
+        auto_ins_cases_label.grid(row = 11,column = 5,padx = 10,pady = 10)
+
+        self.auto_ins_cases_entry = ttk.Entry()
+        self.auto_ins_cases_entry.grid(row = 12,column = 5,padx = 10,pady = 10)
+
+
+        med_ins_cases_label = ttk.Label(self.root,text = "Кол-во страх. случаев (мед):",font = self.common_label_font)
+        med_ins_cases_label.grid(row = 13,column = 5,padx = 10,pady = 10)
+
+        self.med_ins_cases_entry = ttk.Entry()
+        self.med_ins_cases_entry.grid(row = 14,column = 5,padx = 10,pady = 10)
+        
+        
+        
         return
 
     def init_buttons(self) -> None:
@@ -456,6 +479,7 @@ class Interface:
         self.refresh_net_profit_entry()
         self.refresh_tax_entry()
         self.refresh_curmonth_entry()
+        self.refresh_ins_cases_entries()
         return 
 
     def refresh_networth_entry(self) -> None:
@@ -493,5 +517,14 @@ class Interface:
         self.curmonth_entry.delete(0,50)
         self.curmonth_entry.insert(0,str(self.experiment.curmonth-1))
 
+        return 
+    
+    def refresh_ins_cases_entries(self) -> None:
+        self.auto_ins_cases_entry.delete(0,50)
+        self.auto_ins_cases_entry.insert(0,str(self.experiment.cur_auto_ins_cases))
+
+        self.med_ins_cases_entry.delete(0,50)
+        self.med_ins_cases_entry.insert(0,str(self.experiment.cur_med_ins_cases))
+        
         return 
 
